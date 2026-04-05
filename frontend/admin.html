@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-title">🛡️ Admin Panel</div>
+  <button class="btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="dashboard">
+
+  <!-- STATS -->
+  <div class="section">
+    <h3>Dashboard Overview</h3>
+    <div id="statsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 8px;">
+      <div class="stat-card" id="stat-users">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val" id="stat-total-users">--</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card" id="stat-students">
+        <div class="stat-icon">🎒</div>
+        <div class="stat-val" id="stat-total-students">--</div>
+        <div class="stat-label">Students</div>
+      </div>
+      <div class="stat-card" id="stat-teachers">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-val" id="stat-total-teachers">--</div>
+        <div class="stat-label">Teachers</div>
+      </div>
+      <div class="stat-card" id="stat-courses">
+        <div class="stat-icon">📚</div>
+        <div class="stat-val" id="stat-total-courses">--</div>
+        <div class="stat-label">Courses</div>
+      </div>
+      <div class="stat-card" id="stat-quizzes">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-val" id="stat-total-quizzes">--</div>
+        <div class="stat-label">Quizzes</div>
+      </div>
+      <div class="stat-card" id="stat-results">
+        <div class="stat-icon">📊</div>
+        <div class="stat-val" id="stat-total-results">--</div>
+        <div class="stat-label">Submissions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="section">
+    <h3>All Users</h3>
+
+    <!-- Search & Filter -->
+    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+      <input
+        id="userSearch"
+        placeholder="Search by name or email..."
+        oninput="filterUsers()"
+        style="flex: 1; min-width: 200px;"
+      >
+      <select id="roleFilter" onchange="filterUsers()" style="width: auto; min-width: 140px;">
+        <option value="all">All Roles</option>
+        <option value="student">Students</option>
+        <option value="teacher">Teachers</option>
+        <option value="admin">Admins</option>
+      </select>
+    </div>
+
+    <div id="userList" class="grid"></div>
+    <p id="noUsersMsg" style="display:none; color:#888; font-size:14px;">No users match your search.</p>
+  </div>
+
+  <!-- COURSES -->
+  <div class="section">
+    <h3>All Courses</h3>
+    <div id="courseList" class="grid"></div>
+  </div>
+
+</div>
+
+<style>
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border: 1px solid #f0f0ff;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+  }
+
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(99,102,241,0.15); }
+
+  .stat-icon { font-size: 28px; margin-bottom: 8px; }
+  .stat-val { font-size: 28px; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: #888; font-weight: 500; }
+
+  .role-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .role-student { background: #eef2ff; color: #4338ca; }
+  .role-teacher { background: #fdf4ff; color: #7c3aed; }
+  .role-admin { background: #fff7ed; color: #c2410c; }
+
+  .user-email { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .user-joined { font-size: 11px; color: #aaa; margin-bottom: 12px; }
+</style>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user || user.role !== "admin") {
+  window.location.href = "index.html";
+}
+
+const API = "http://localhost:5000/api";
+
+let allUsers = [];
+
+
+// ---------------- LOAD STATS ----------------
+async function loadStats() {
+  try {
+    const response = await fetch(API + "/admin/stats", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const stats = await response.json();
+
+    document.getElementById("stat-total-users").innerText = stats.totalUsers;
+    document.getElementById("stat-total-students").innerText = stats.totalStudents;
+    document.getElementById("stat-total-teachers").innerText = stats.totalTeachers;
+    document.getElementById("stat-total-courses").innerText = stats.totalCourses;
+    document.getElementById("stat-total-quizzes").innerText = stats.totalQuizzes;
+    document.getElementById("stat-total-results").innerText = stats.totalResults;
+
+  } catch (error) {
+    console.log("Error loading stats", error);
+  }
+}
+
+
+// ---------------- LOAD USERS ----------------
+async function loadUsers() {
+  try {
+    const response = await fetch(API + "/admin/users", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    allUsers = await response.json();
+    renderUsers(allUsers);
+
+  } catch (error) {
+    console.log("Error loading users", error);
+  }
+}
+
+
+// ---------------- RENDER USERS ----------------
+function renderUsers(users) {
+  const list = document.getElementById("userList");
+  const noMsg = document.getElementById("noUsersMsg");
+  list.innerHTML = "";
+
+  if (users.length === 0) {
+    noMsg.style.display = "block";
+    return;
+  }
+
+  noMsg.style.display = "none";
+
+  users.forEach(u => {
+    const card = document.createElement("div");
+    card.className = "course-card";
+
+    const joined = new Date(u.createdAt).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+
+    const isSelf = u._id === user._id;
+
+    card.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <div class="course-title" style="margin-bottom: 0;">${u.name}</div>
+        <span class="role-badge role-${u.role}">${u.role}</span>
+      </div>
+      <div class="user-email">✉️ ${u.email}</div>
+      <div class="user-joined">📅 Joined ${joined}</div>
+      <div class="button-group">
+        ${isSelf
+          ? `<span style="font-size: 12px; color: #888;">This is you</span>`
+          : `<button class="btn danger" onclick="deleteUser('${u._id}')">Delete</button>`
+        }
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+
+// ---------------- FILTER USERS ----------------
+function filterUsers() {
+  const search = document.getElementById("userSearch").value.toLowerCase();
+  const role = document.getElementById("roleFilter").value;
+
+  const filtered = allUsers.filter(u => {
+    const matchesSearch = u.name.toLowerCase().includes(search) ||
+                          u.email.toLowerCase().includes(search);
+    const matchesRole = role === "all" || u.role === role;
+    return matchesSearch && matchesRole;
+  });
+
+  renderUsers(filtered);
+}
+
+
+// ---------------- LOAD COURSES ----------------
+async function loadCourses() {
+  try {
+    const response = await fetch(API + "/admin/courses", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const courses = await response.json();
+    const list = document.getElementById("courseList");
+    list.innerHTML = "";
+
+    if (courses.length === 0) {
+      list.innerHTML = `<p style="color:#888; font-size:14px;">No courses yet.</p>`;
+      return;
+    }
+
+    courses.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+
+      card.innerHTML = `
+        <div class="course-title">${c.title}</div>
+        <div class="course-meta">
+          👨‍🏫 ${c.teacher ? c.teacher.name : "Unknown"} &nbsp;·&nbsp;
+          ✉️ ${c.teacher ? c.teacher.email : ""}
+        </div>
+        <div class="user-joined">👥 ${c.students ? c.students.length : 0} students enrolled</div>
+        <div class="button-group">
+          <button class="btn danger" onclick="deleteCourse('${c._id}')">Delete</button>
+        </div>
+      `;
+
+      list.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading courses", error);
+  }
+}
+
+
+// ---------------- DELETE USER ----------------
+async function deleteUser(id) {
+  if (!confirm("Delete this user? This will also delete all their courses, lectures, quizzes and results.")) return;
+
+  try {
+    const response = await fetch(API + "/admin/user/" + id, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      loadUsers();
+      loadStats();
+      loadCourses();
+    } else {
+      alert(data.message);
+    }
+
+  } catch (error) {
+    console.log("Error deleting user", error);
+  }
+}
+
+
+// ---------------- DELETE COURSE ----------------
+async function deleteCourse(id) {
+  if (!confirm("Delete this course? This will also delete all lectures, quizzes and attachments.")) return;
+
+  try {
+    const response = await fetch(API + "/admin/course/" + id, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (response.ok) {
+      loadCourses();
+      loadStats();
+    }
+
+  } catch (error) {
+    console.log("Error deleting course", error);
+  }
+}
+
+
+// ---------------- LOGOUT ----------------
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
+
+// ---------------- INITIAL LOAD ----------------
+loadStats();
+loadUsers();
+loadCourses();
+</script>
+
+</body>
+</html>

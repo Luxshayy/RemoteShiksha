@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 🔝 NAVBAR -->
+<div class="navbar">
+  <div class="nav-title">Quiz</div>
+  <button class="btn" onclick="goBack()">Back</button>
+</div>
+
+<div class="dashboard">
+
+  <h2 id="quizTitle"></h2>
+
+  <!-- TIMER (students only) -->
+  <div id="timerSection" style="display:none;">
+    <div id="timerBox" style="
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: #EAF3DE;
+      color: #3B6D11;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: background 0.3s, color 0.3s;
+    ">
+      ⏱ <span id="timerDisplay">--:--</span>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <form id="quizForm" class="section"></form>
+
+  <!-- TEACHER PANEL -->
+  <div id="teacherPanel" style="display:none" class="section">
+
+    <h3>Add Question</h3>
+
+    <div class="card form-card">
+
+      <div class="form-group">
+        <label>Question</label>
+        <input id="questionText" placeholder="Enter question">
+      </div>
+
+      <div class="form-group">
+        <label>Options</label>
+        <input id="option1" placeholder="Option 1">
+        <input id="option2" placeholder="Option 2">
+        <input id="option3" placeholder="Option 3">
+        <input id="option4" placeholder="Option 4">
+      </div>
+
+      <div class="form-group">
+        <label>Correct Answer Index (0-3)</label>
+        <input id="correctAnswer" placeholder="e.g. 1">
+      </div>
+
+      <button class="btn" type="button" onclick="addQuestion()">Add Question</button>
+      <p id="teacherMessage"></p>
+
+    </div>
+
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="section">
+    <button id="submitBtn" class="btn" onclick="submitQuiz()">Submit Quiz</button>
+    <p id="result"></p>
+  </div>
+
+</div>
+
+<script>
+
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user) {
+  window.location.href = "index.html";
+}
+
+const params = new URLSearchParams(window.location.search);
+const quizId = params.get("id");
+
+const API = "http://localhost:5000/api";
+
+let questions = [];
+let timerInterval = null;
+let timeLeft = 0;
+let quizSubmitted = false;
+
+
+// SHOW TEACHER PANEL
+if (user.role === "teacher") {
+  document.getElementById("teacherPanel").style.display = "block";
+  document.getElementById("submitBtn").style.display = "none";
+}
+
+
+// LOAD QUIZ
+async function loadQuiz() {
+  try {
+    const response = await fetch(API + "/quiz/" + quizId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const quiz = await response.json();
+
+    document.getElementById("quizTitle").innerText = quiz.title;
+
+    questions = quiz.questions;
+
+    // Start timer for students
+    if (user.role === "student" && quiz.duration) {
+      startTimer(quiz.duration);
+    }
+
+    const form = document.getElementById("quizForm");
+    form.innerHTML = "";
+
+    questions.forEach((q, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <p><strong>${index + 1}. ${q.question}</strong></p>
+
+        ${user.role === "teacher"
+          ? `<button class="btn" onclick="deleteQuestion('${q._id}')">Delete Question</button>`
+          : ""
+        }
+
+        <div class="options">
+          ${q.options.map((option, optionIndex) => `
+            <label class="option">
+              <input type="radio" name="question${index}" value="${optionIndex}">
+              ${option}
+            </label>
+          `).join("")}
+        </div>
+      `;
+
+      form.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading quiz", error);
+  }
+}
+
+
+// START TIMER
+function startTimer(durationMinutes) {
+  timeLeft = durationMinutes * 60;
+
+  document.getElementById("timerSection").style.display = "block";
+
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+
+    // Turn yellow at 2 minutes
+    if (timeLeft === 120) {
+      document.getElementById("timerBox").style.background = "#FAEEDA";
+      document.getElementById("timerBox").style.color = "#854F0B";
+    }
+
+    // Turn red at 30 seconds
+    if (timeLeft === 30) {
+      document.getElementById("timerBox").style.background = "#FCEBEB";
+      document.getElementById("timerBox").style.color = "#A32D2D";
+    }
+
+    // Auto submit when time runs out
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById("timerDisplay").innerText = "00:00";
+      if (!quizSubmitted) {
+        alert("⏰ Time's up! Your quiz is being submitted automatically.");
+        submitQuiz();
+      }
+    }
+
+  }, 1000);
+}
+
+
+// UPDATE TIMER DISPLAY
+function updateTimerDisplay() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  document.getElementById("timerDisplay").innerText =
+    String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+}
+
+
+// ADD QUESTION
+async function addQuestion() {
+  const question = document.getElementById("questionText").value;
+
+  const options = [
+    document.getElementById("option1").value,
+    document.getElementById("option2").value,
+    document.getElementById("option3").value,
+    document.getElementById("option4").value
+  ];
+
+  const correctAnswer = parseInt(document.getElementById("correctAnswer").value);
+
+  try {
+    const response = await fetch(API + "/quiz/" + quizId + "/question", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ question, options, correctAnswer })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("teacherMessage").innerText = "Question added successfully";
+      document.getElementById("questionText").value = "";
+      document.getElementById("option1").value = "";
+      document.getElementById("option2").value = "";
+      document.getElementById("option3").value = "";
+      document.getElementById("option4").value = "";
+      document.getElementById("correctAnswer").value = "";
+      loadQuiz();
+    } else {
+      document.getElementById("teacherMessage").innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log("Error adding question", error);
+  }
+}
+
+
+// DELETE QUESTION
+async function deleteQuestion(questionId) {
+  if (!confirm("Delete this question?")) return;
+
+  try {
+    const response = await fetch(
+      API + "/quiz/" + quizId + "/question/" + questionId,
+      {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      }
+    );
+
+    if (response.ok) loadQuiz();
+
+  } catch (error) {
+    console.log("Error deleting question", error);
+  }
+}
+
+
+// SUBMIT QUIZ
+async function submitQuiz() {
+  if (quizSubmitted) return;
+  quizSubmitted = true;
+
+  // Stop timer
+  clearInterval(timerInterval);
+
+  // Disable submit button
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("submitBtn").innerText = "Submitting...";
+
+  const answers = [];
+
+  questions.forEach((q, index) => {
+    const selected = document.querySelector(
+      'input[name="question' + index + '"]:checked'
+    );
+    answers.push(selected ? parseInt(selected.value) : null);
+  });
+
+  try {
+    const response = await fetch(API + "/quiz/submit/" + quizId, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ answers })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      const percentage = Math.round((result.score / result.total) * 100);
+
+      let color, label;
+      if (percentage >= 80) { color = "#38a169"; label = "Excellent! 🎉"; }
+      else if (percentage >= 50) { color = "#d69e2e"; label = "Good job! 👍"; }
+      else { color = "#e53e3e"; label = "Keep practicing! 💪"; }
+
+      document.getElementById("result").innerHTML = `
+        <div style="margin-top: 16px; padding: 16px; border-radius: 12px; background: ${color}20; border: 1px solid ${color}40; text-align: center;">
+          <div style="font-size: 28px; font-weight: 600; color: ${color};">${percentage}%</div>
+          <div style="font-size: 16px; color: ${color}; margin: 4px 0;">${label}</div>
+          <div style="font-size: 14px; color: #888;">Score: ${result.score} / ${result.total}</div>
+        </div>
+      `;
+
+      // Hide submit button and timer
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("timerSection").style.display = "none";
+
+      // Disable all radio buttons
+      document.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+
+    } else {
+      document.getElementById("result").innerText = result.message;
+      document.getElementById("submitBtn").disabled = false;
+      document.getElementById("submitBtn").innerText = "Submit Quiz";
+      quizSubmitted = false;
+    }
+
+  } catch (error) {
+    console.log("Error submitting quiz", error);
+    quizSubmitted = false;
+  }
+}
+
+
+// BACK
+function goBack() {
+  window.history.back();
+}
+
+
+// INIT
+loadQuiz();
+
+</script>
+
+</body>
+</html>

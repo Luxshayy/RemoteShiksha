@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RemoteShiksha - Register</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="auth-page">
+
+<div class="auth-card">
+
+  <h1 class="auth-title">RemoteShiksha</h1>
+  <p class="auth-subtitle">Create your account</p>
+
+  <form id="registerForm">
+
+    <input type="text" id="name" placeholder="Full Name" required>
+
+    <input type="email" id="email" placeholder="Email" required>
+
+    <input type="password" id="password" placeholder="Password" required>
+
+    <select id="role">
+      <option value="student">Student</option>
+      <option value="teacher">Teacher</option>
+    </select>
+
+    <button class="btn" type="submit">Register</button>
+
+  </form>
+
+  <p id="message"></p>
+
+  <br>
+
+  <p>
+    Already have an account?
+    <a href="index.html">Login</a>
+  </p>
+
+</div>
+
+<script src="js/register.js"></script>
+
+</body>
+</html>

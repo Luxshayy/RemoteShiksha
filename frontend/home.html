@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RemoteShiksha</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body { background: #fff; color: #333; overflow-x: hidden; }
+
+    /* ======= NAVBAR ======= */
+    .lp-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 60px;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(99,102,241,0.1);
+    }
+
+    .lp-logo {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .lp-nav-btns { display: flex; gap: 12px; }
+
+    .lp-btn-outline {
+      padding: 10px 26px;
+      border-radius: 10px;
+      border: 2px solid #6366f1;
+      background: transparent;
+      color: #6366f1;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lp-btn-outline:hover { background: #6366f1; color: white; }
+
+    .lp-btn-solid {
+      padding: 10px 26px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+
+    .lp-btn-solid:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.4); }
+
+    /* ======= HERO ======= */
+    .lp-hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 55%, #f093fb 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 140px 20px 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lp-hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      top: -100px; left: -150px;
+    }
+
+    .lp-hero::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      bottom: -80px; right: -80px;
+    }
+
+    .lp-hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 18px;
+      border-radius: 999px;
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+
+    .lp-hero-title {
+      font-size: 68px;
+      font-weight: 800;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .lp-hero-sub {
+      font-size: 20px;
+      color: rgba(255,255,255,0.88);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    .lp-hero-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .lp-hero-btn-white {
+      padding: 16px 44px;
+      border-radius: 14px;
+      border: none;
+      background: white;
+      color: #6366f1;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .lp-hero-btn-white:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.2); }
+
+    .lp-hero-btn-ghost {
+      padding: 16px 44px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.7);
+      background: transparent;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .lp-hero-btn-ghost:hover { background: rgba(255,255,255,0.15); border-color: white; transform: translateY(-3px); }
+
+    .lp-hero-stats {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .lp-stat { text-align: center; color: white; }
+    .lp-stat-num { font-size: 32px; font-weight: 800; }
+    .lp-stat-label { font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 500; margin-top: 2px; }
+
+    .lp-stat-divider {
+      width: 1px;
+      background: rgba(255,255,255,0.25);
+      align-self: stretch;
+    }
+
+    /* ======= SECTION BASE ======= */
+    .lp-section {
+      padding: 100px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .lp-section-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, #eef2ff, #fdf4ff);
+      color: #6366f1;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .lp-section-title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #1e1b4b;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .lp-section-sub {
+      font-size: 17px;
+      color: #666;
+      line-height: 1.7;
+      max-width: 580px;
+    }
+
+    /* ======= ABOUT ======= */
+    .lp-about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 100px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .lp-about-visual {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(99,102,241,0.25);
+    }
+
+    .lp-about-emoji { font-size: 80px; margin-bottom: 20px; }
+    .lp-about-visual-title { font-size: 22px; font-weight: 700; color: white; margin-bottom: 10px; }
+    .lp-about-visual-sub { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+
+    .lp-about-points { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; }
+
+    .lp-about-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 20px;
+      background: #f8f8ff;
+      border-radius: 14px;
+      border-left: 4px solid #6366f1;
+    }
+
+    .lp-about-point-icon { font-size: 22px; flex-shrink: 0; }
+    .lp-about-point-title { font-size: 15px; font-weight: 600; color: #1e1b4b; margin-bottom: 3px; }
+    .lp-about-point-text { font-size: 13px; color: #666; line-height: 1.5; }
+
+    /* ======= WHY ======= */
+    .lp-why { background: linear-gradient(135deg, #f0f4ff 0%, #fdf6ff 100%); padding: 100px 0; }
+    .lp-why-inner { max-width: 1100px; margin: 0 auto; padding: 0 60px; }
+
+    .lp-why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .lp-why-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid #f0f0ff;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lp-why-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+    }
+
+    .lp-why-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(99,102,241,0.15); }
+    .lp-why-icon { font-size: 36px; margin-bottom: 16px; }
+    .lp-why-title { font-size: 17px; font-weight: 700; color: #1e1b4b; margin-bottom: 10px; }
+    .lp-why-text { font-size: 14px; color: #666; line-height: 1.6; }
+
+    /* ======= FEATURES ======= */
+    .lp-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .lp-feature-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 2px solid #f0f0ff;
+      transition: all 0.25s;
+    }
+
+    .lp-feature-card:hover { border-color: #c7d2fe; transform: translateY(-4px); box-shadow: 0 12px 32px rgba(99,102,241,0.12); }
+    .lp-feature-icon { font-size: 40px; margin-bottom: 16px; display: block; }
+    .lp-feature-title { font-size: 16px; font-weight: 700; color: #1e1b4b; margin-bottom: 8px; }
+    .lp-feature-text { font-size: 13px; color: #777; line-height: 1.6; }
+
+    /* ======= HOW IT WORKS ======= */
+    .lp-how { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 100px 60px; }
+    .lp-how-inner { max-width: 1100px; margin: 0 auto; }
+    .lp-how-inner .lp-section-title { color: white; }
+    .lp-how-inner .lp-section-sub { color: rgba(255,255,255,0.8); }
+    .lp-how-inner .lp-section-tag { background: rgba(255,255,255,0.15); color: white; }
+
+    .lp-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .lp-step {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      transition: all 0.25s;
+    }
+
+    .lp-step:hover { background: rgba(255,255,255,0.2); transform: translateY(-4px); }
+
+    .lp-step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: white;
+      color: #6366f1;
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .lp-step-title { font-size: 17px; font-weight: 700; color: white; margin-bottom: 10px; }
+    .lp-step-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+
+    /* ======= ROLES ======= */
+    .lp-roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      margin-top: 48px;
+    }
+
+    .lp-role-card { border-radius: 22px; padding: 36px 30px; transition: all 0.25s; position: relative; overflow: hidden; }
+    .lp-role-card:hover { transform: translateY(-6px); }
+    .lp-role-student { background: linear-gradient(135deg, #eef2ff, #e0e7ff); border: 2px solid #c7d2fe; }
+    .lp-role-teacher { background: linear-gradient(135deg, #fdf4ff, #fae8ff); border: 2px solid #e9d5ff; }
+    .lp-role-admin { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 2px solid #fed7aa; }
+    .lp-role-icon { font-size: 44px; margin-bottom: 16px; }
+    .lp-role-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .lp-role-student .lp-role-title { color: #4338ca; }
+    .lp-role-teacher .lp-role-title { color: #7c3aed; }
+    .lp-role-admin .lp-role-title { color: #c2410c; }
+    .lp-role-sub { font-size: 13px; margin-bottom: 20px; }
+    .lp-role-student .lp-role-sub { color: #6366f1; }
+    .lp-role-teacher .lp-role-sub { color: #8b5cf6; }
+    .lp-role-admin .lp-role-sub { color: #ea580c; }
+    .lp-role-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .lp-role-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #444; font-weight: 500; }
+    .lp-role-list li::before { content: '✓'; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .lp-role-student .lp-role-list li::before { background: #c7d2fe; color: #4338ca; }
+    .lp-role-teacher .lp-role-list li::before { background: #e9d5ff; color: #7c3aed; }
+    .lp-role-admin .lp-role-list li::before { background: #fed7aa; color: #c2410c; }
+
+    /* ======= TESTIMONIALS ======= */
+    .lp-testimonials { background: linear-gradient(135deg, #f0f4ff, #fdf6ff); padding: 100px 60px; }
+    .lp-testimonials-inner { max-width: 1100px; margin: 0 auto; }
+
+    .lp-testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .lp-testi-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid #f0f0ff;
+      transition: all 0.25s;
+    }
+
+    .lp-testi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(99,102,241,0.1); }
+    .lp-testi-stars { color: #f59e0b; font-size: 18px; margin-bottom: 14px; }
+    .lp-testi-text { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .lp-testi-author { display: flex; align-items: center; gap: 12px; }
+    .lp-testi-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; flex-shrink: 0; }
+    .lp-testi-name { font-size: 14px; font-weight: 700; color: #1e1b4b; }
+    .lp-testi-role { font-size: 12px; color: #888; }
+
+    /* ======= CTA ======= */
+    .lp-cta { background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899); padding: 100px 60px; text-align: center; }
+    .lp-cta-title { font-size: 44px; font-weight: 800; color: white; margin-bottom: 16px; line-height: 1.2; }
+    .lp-cta-sub { font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 40px; line-height: 1.6; }
+    .lp-cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ======= FOOTER ======= */
+    .lp-footer {
+      background: #0f0d2e;
+      padding: 60px 60px 30px;
+    }
+
+    .lp-footer-top {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .lp-footer-brand-logo {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .lp-footer-brand-text {
+      font-size: 14px;
+      color: #9ca3af;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .lp-footer-social {
+      display: flex;
+      gap: 12px;
+    }
+
+    .lp-footer-social-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .lp-footer-social-link:hover {
+      border-color: rgba(129,140,248,0.5);
+      color: #818cf8;
+      background: rgba(129,140,248,0.08);
+    }
+
+    .lp-footer-col-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .lp-footer-col-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lp-footer-col-list li {
+      font-size: 14px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lp-footer-col-list li span {
+      font-size: 15px;
+    }
+
+    .lp-footer-developer {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 36px;
+      padding: 20px 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+    }
+
+    .lp-footer-dev-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .lp-footer-dev-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 3px;
+    }
+
+    .lp-footer-dev-role {
+      font-size: 12px;
+      color: #818cf8;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .lp-footer-dev-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .lp-footer-dev-link {
+      font-size: 12px;
+      color: #9ca3af;
+      text-decoration: none;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+
+    .lp-footer-dev-link:hover { color: #818cf8; border-color: #818cf8; }
+
+    .lp-footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .lp-footer-copy { font-size: 13px; color: #4b5563; }
+    .lp-footer-copy span { color: #ec4899; }
+    .lp-footer-email { font-size: 13px; color: #4b5563; }
+    .lp-footer-email a { color: #818cf8; text-decoration: none; }
+    .lp-footer-email a:hover { text-decoration: underline; }
+
+    /* ======= RESPONSIVE ======= */
+    @media (max-width: 768px) {
+      .lp-nav { padding: 14px 20px; }
+      .lp-hero { padding: 120px 20px 80px; }
+      .lp-hero-title { font-size: 40px; }
+      .lp-hero-sub { font-size: 16px; }
+      .lp-about { grid-template-columns: 1fr; padding: 60px 20px; }
+      .lp-section { padding: 60px 20px; }
+      .lp-how { padding: 60px 20px; }
+      .lp-testimonials { padding: 60px 20px; }
+      .lp-cta { padding: 60px 20px; }
+      .lp-footer { padding: 40px 20px 20px; }
+      .lp-footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .lp-footer-bottom { flex-direction: column; text-align: center; }
+      .lp-hero-stats { gap: 24px; }
+      .lp-stat-divider { display: none; }
+      .lp-footer-developer { flex-direction: column; text-align: center; }
+      .lp-footer-dev-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ======= NAVBAR ======= -->
+<nav class="lp-nav">
+  <div class="lp-logo">🎓 RemoteShiksha</div>
+  <div class="lp-nav-btns">
+    <button class="lp-btn-outline" onclick="window.location.href='index.html'">Login</button>
+    <button class="lp-btn-solid" onclick="window.location.href='register.html'">Register For Free</button>
+  </div>
+</nav>
+
+<!-- ======= HERO ======= -->
+<section class="lp-hero">
+  <div class="lp-hero-badge">🚀 India's Remote Learning Platform</div>
+  <h1 class="lp-hero-title">Learn Anywhere.<br>Teach Everywhere.</h1>
+  <p class="lp-hero-sub">RemoteShiksha brings students, teachers and admins together on one powerful platform — with live classes, quizzes, and more.</p>
+  <div class="lp-hero-btns">
+    <button class="lp-hero-btn-white" onclick="window.location.href='register.html'">Get Started Now</button>
+    <button class="lp-hero-btn-ghost" onclick="window.location.href='index.html'">Login to Account</button>
+  </div>
+  <div class="lp-hero-stats">
+    <div class="lp-stat"><div class="lp-stat-num">500+</div><div class="lp-stat-label">Students Enrolled</div></div>
+    <div class="lp-stat-divider"></div>
+    <div class="lp-stat"><div class="lp-stat-num">50+</div><div class="lp-stat-label">Courses Available</div></div>
+    <div class="lp-stat-divider"></div>
+    <div class="lp-stat"><div class="lp-stat-num">30+</div><div class="lp-stat-label">Expert Teachers</div></div>
+    <div class="lp-stat-divider"></div>
+    <div class="lp-stat"><div class="lp-stat-num">100%</div><div class="lp-stat-label">Free to Join</div></div>
+  </div>
+</section>
+
+<!-- ======= ABOUT ======= -->
+<section>
+  <div class="lp-about">
+    <div>
+      <span class="lp-section-tag">About the Platform</span>
+      <h2 class="lp-section-title">What is RemoteShiksha?</h2>
+      <p class="lp-section-sub">RemoteShiksha is a modern Learning Management System built for the next generation of learners and educators in India. Whether you're in a city or a village — if you have internet, you have a classroom.</p>
+      <div class="lp-about-points">
+        <div class="lp-about-point">
+          <span class="lp-about-point-icon">🌍</span>
+          <div>
+            <div class="lp-about-point-title">Built for Bharat</div>
+            <div class="lp-about-point-text">Designed keeping rural and urban students in mind — lightweight, fast, and works on low bandwidth.</div>
+          </div>
+        </div>
+        <div class="lp-about-point">
+          <span class="lp-about-point-icon">🔒</span>
+          <div>
+            <div class="lp-about-point-title">Secure & Role-Based</div>
+            <div class="lp-about-point-text">Students, teachers and admins each have their own tailored experience with secure JWT authentication.</div>
+          </div>
+        </div>
+        <div class="lp-about-point">
+          <span class="lp-about-point-icon">⚡</span>
+          <div>
+            <div class="lp-about-point-title">Real-Time Learning</div>
+            <div class="lp-about-point-text">Live streaming, instant quiz results and real-time feedback — learning that keeps up with you.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lp-about-visual">
+      <div class="lp-about-emoji">🎓</div>
+      <div class="lp-about-visual-title">Your Classroom, Reimagined</div>
+      <div class="lp-about-visual-sub">No building. No commute. Just pure learning — anywhere, anytime, on any device.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= WHY ======= -->
+<section class="lp-why">
+  <div class="lp-why-inner">
+    <span class="lp-section-tag">Why Choose Us</span>
+    <h2 class="lp-section-title">Why RemoteShiksha?</h2>
+    <p class="lp-section-sub">We're not just another e-learning tool. We're a complete ecosystem built with modern technology and a student-first mindset.</p>
+    <div class="lp-why-grid">
+      <div class="lp-why-card"><div class="lp-why-icon">🎯</div><div class="lp-why-title">Purpose Built</div><div class="lp-why-text">Every feature is designed with a clear goal — to make learning more accessible, engaging, and effective.</div></div>
+      <div class="lp-why-card"><div class="lp-why-icon">📱</div><div class="lp-why-title">Works Everywhere</div><div class="lp-why-text">Fully responsive across phones, tablets and desktops. Learn from your couch, commute, or classroom.</div></div>
+      <div class="lp-why-card"><div class="lp-why-icon">🔴</div><div class="lp-why-title">Live Classes</div><div class="lp-why-text">Teachers can go live instantly via YouTube. Students join with one click — no app download needed.</div></div>
+      <div class="lp-why-card"><div class="lp-why-icon">🏆</div><div class="lp-why-title">Track Progress</div><div class="lp-why-text">Students can see their quiz scores, progress bars and performance history all in one place.</div></div>
+      <div class="lp-why-card"><div class="lp-why-icon">📎</div><div class="lp-why-title">Rich Content</div><div class="lp-why-text">Teachers can attach PDFs, images, videos and documents directly to lectures via Cloudinary.</div></div>
+      <div class="lp-why-card"><div class="lp-why-icon">🛡️</div><div class="lp-why-title">Secure by Design</div><div class="lp-why-text">JWT authentication, role-based access control and encrypted passwords keep your data safe.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FEATURES ======= -->
+<section class="lp-section">
+  <span class="lp-section-tag">Platform Features</span>
+  <h2 class="lp-section-title">Everything you need to learn & teach</h2>
+  <p class="lp-section-sub">A complete toolkit for students, teachers and admins — all under one roof.</p>
+  <div class="lp-features-grid">
+    <div class="lp-feature-card"><span class="lp-feature-icon">🔴</span><div class="lp-feature-title">Live Streaming</div><div class="lp-feature-text">Teachers go live via YouTube. Students watch the stream directly inside the course page.</div></div>
+    <div class="lp-feature-card"><span class="lp-feature-icon">📚</span><div class="lp-feature-title">Lecture System</div><div class="lp-feature-text">Create, edit and organize lectures with rich text content and file attachments.</div></div>
+    <div class="lp-feature-card"><span class="lp-feature-icon">⏱️</span><div class="lp-feature-title">Timed Quizzes</div><div class="lp-feature-text">Teachers set a timer. Students answer under pressure. Auto-submit when time runs out.</div></div>
+    <div class="lp-feature-card"><span class="lp-feature-icon">📊</span><div class="lp-feature-title">Score Tracking</div><div class="lp-feature-text">Visual progress bars and percentage scores help students understand their performance.</div></div>
+    <div class="lp-feature-card"><span class="lp-feature-icon">📎</span><div class="lp-feature-title">File Attachments</div><div class="lp-feature-text">Upload PDFs, images and videos to lectures. Stored securely on Cloudinary.</div></div>
+    <div class="lp-feature-card"><span class="lp-feature-icon">🔐</span><div class="lp-feature-title">Role Based Access</div><div class="lp-feature-text">Students, teachers and admins each see only what they need — nothing more.</div></div>
+  </div>
+</section>
+
+<!-- ======= HOW IT WORKS ======= -->
+<section class="lp-how">
+  <div class="lp-how-inner">
+    <span class="lp-section-tag">How It Works</span>
+    <h2 class="lp-section-title">Up and running in 3 steps</h2>
+    <p class="lp-section-sub">Getting started on RemoteShiksha is simple — whether you're here to learn or teach.</p>
+    <div class="lp-steps">
+      <div class="lp-step"><div class="lp-step-num">1</div><div class="lp-step-title">Create your account</div><div class="lp-step-text">Register in seconds. Choose your role — student, teacher, or get assigned as admin.</div></div>
+      <div class="lp-step"><div class="lp-step-num">2</div><div class="lp-step-title">Join or create a course</div><div class="lp-step-text">Students browse and enroll in courses. Teachers create courses and add lectures instantly.</div></div>
+      <div class="lp-step"><div class="lp-step-num">3</div><div class="lp-step-title">Learn & grow</div><div class="lp-step-text">Watch lectures, attend live classes, attempt quizzes and track your progress over time.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= ROLES ======= -->
+<section class="lp-section">
+  <span class="lp-section-tag">Role Based Experience</span>
+  <h2 class="lp-section-title">Built for everyone in the classroom</h2>
+  <p class="lp-section-sub">Every user gets a tailored experience designed for exactly what they need to do.</p>
+  <div class="lp-roles-grid">
+    <div class="lp-role-card lp-role-student">
+      <div class="lp-role-icon">🎒</div>
+      <div class="lp-role-title">Student</div>
+      <div class="lp-role-sub">Learn at your own pace</div>
+      <ul class="lp-role-list">
+        <li>Enroll in courses instantly</li>
+        <li>Watch lectures & attachments</li>
+        <li>Attend live classes</li>
+        <li>Attempt timed quizzes</li>
+        <li>Track scores & progress</li>
+      </ul>
+    </div>
+    <div class="lp-role-card lp-role-teacher">
+      <div class="lp-role-icon">👨‍🏫</div>
+      <div class="lp-role-title">Teacher</div>
+      <div class="lp-role-sub">Teach and inspire</div>
+      <ul class="lp-role-list">
+        <li>Create & manage courses</li>
+        <li>Add lectures with rich content</li>
+        <li>Upload files to lectures</li>
+        <li>Go live via YouTube</li>
+        <li>Create timed quizzes</li>
+      </ul>
+    </div>
+    <div class="lp-role-card lp-role-admin">
+      <div class="lp-role-icon">🛡️</div>
+      <div class="lp-role-title">Admin</div>
+      <div class="lp-role-sub">Control the system</div>
+      <ul class="lp-role-list">
+        <li>View all users & roles</li>
+        <li>Delete users if needed</li>
+        <li>Monitor all courses</li>
+        <li>Remove inappropriate content</li>
+        <li>Full platform oversight</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======= TESTIMONIALS ======= -->
+<section class="lp-testimonials">
+  <div class="lp-testimonials-inner">
+    <span class="lp-section-tag">Testimonials</span>
+    <h2 class="lp-section-title">What our users say</h2>
+    <p class="lp-section-sub">Real feedback from students and teachers who use RemoteShiksha every day.</p>
+    <div class="lp-testi-grid">
+      <div class="lp-testi-card">
+        <div class="lp-testi-stars">★★★★★</div>
+        <p class="lp-testi-text">"RemoteShiksha changed how I study. I can attend live classes from my village and still keep up with my coursework. The quiz timer keeps me sharp!"</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background: linear-gradient(135deg,#6366f1,#8b5cf6);">A</div>
+          <div><div class="lp-testi-name">Aarav Sharma</div><div class="lp-testi-role">Student, Class 11</div></div>
+        </div>
+      </div>
+      <div class="lp-testi-card">
+        <div class="lp-testi-stars">★★★★★</div>
+        <p class="lp-testi-text">"As a teacher, I can now manage all my courses, upload PDFs and go live with students in just a few clicks. It's incredibly easy to use."</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background: linear-gradient(135deg,#ec4899,#f43f5e);">P</div>
+          <div><div class="lp-testi-name">Priya Verma</div><div class="lp-testi-role">Physics Teacher</div></div>
+        </div>
+      </div>
+      <div class="lp-testi-card">
+        <div class="lp-testi-stars">★★★★★</div>
+        <p class="lp-testi-text">"The progress tracking and quiz scores help me understand exactly where I need to improve. It's like having a personal tutor built into the app."</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background: linear-gradient(135deg,#f59e0b,#ef4444);">R</div>
+          <div><div class="lp-testi-name">Rohit Meena</div><div class="lp-testi-role">Student, Class 12</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CTA ======= -->
+<section class="lp-cta">
+  <h2 class="lp-cta-title">Ready to start learning?</h2>
+  <p class="lp-cta-sub">Join hundreds of students and teachers already on RemoteShiksha.<br>It's free, fast and built for you.</p>
+  <div class="lp-cta-btns">
+    <button class="lp-hero-btn-white" onclick="window.location.href='register.html'">Create Free Account</button>
+    <button class="lp-hero-btn-ghost" onclick="window.location.href='index.html'">Login to Account</button>
+  </div>
+</section>
+
+<!-- ======= FOOTER ======= -->
+<footer class="lp-footer">
+  <div class="lp-footer-top">
+
+    <!-- Brand col -->
+    <div>
+      <div class="lp-footer-brand-logo">🎓 RemoteShiksha</div>
+      <p class="lp-footer-brand-text">India's modern Learning Management System — built to make quality education accessible to every student, everywhere.</p>
+      <div class="lp-footer-social">
+        <a href="https://github.com/Luxshayy" target="_blank" class="lp-footer-social-link">
+          <span>🐙</span> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/lakshay-khandelwal-5208a3279/" target="_blank" class="lp-footer-social-link">
+          <span>💼</span> LinkedIn
+        </a>
+      </div>
+
+      <!-- Developer card -->
+      <div class="lp-footer-developer">
+        <div class="lp-footer-dev-avatar">LK</div>
+        <div>
+          <div class="lp-footer-dev-name">Lakshay Khandelwal</div>
+          <div class="lp-footer-dev-role">Full Stack Developer · Creator of RemoteShiksha</div>
+          <div class="lp-footer-dev-links">
+            <a href="https://github.com/Luxshayy" target="_blank" class="lp-footer-dev-link">🐙 GitHub</a>
+            <a href="https://www.linkedin.com/in/lakshay-khandelwal-5208a3279/" target="_blank" class="lp-footer-dev-link">💼 LinkedIn</a>
+            <a href="mailto:lakshaykhandelwal1801@gmail.com" class="lp-footer-dev-link">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform col -->
+    <div>
+      <div class="lp-footer-col-title">Platform</div>
+      <ul class="lp-footer-col-list">
+        <li><span>🔴</span> Live Classes</li>
+        <li><span>📚</span> Lecture System</li>
+        <li><span>⏱️</span> Timed Quizzes</li>
+        <li><span>📎</span> File Attachments</li>
+        <li><span>📊</span> Score Tracking</li>
+      </ul>
+    </div>
+
+    <!-- Roles col -->
+    <div>
+      <div class="lp-footer-col-title">For Everyone</div>
+      <ul class="lp-footer-col-list">
+        <li><span>🎒</span> Students</li>
+        <li><span>👨‍🏫</span> Teachers</li>
+        <li><span>🛡️</span> Admins</li>
+        <li><span>🌍</span> Built for Bharat</li>
+        <li><span>🔐</span> Secure by Design</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="lp-footer-bottom">
+    <div class="lp-footer-copy">Built with <span>❤️</span> for students everywhere · © 2026 RemoteShiksha</div>
+    <div class="lp-footer-email">Contact: <a href="mailto:lakshaykhandelwal1801@gmail.com">lakshaykhandelwal1801@gmail.com</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

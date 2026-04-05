@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="nav-title">RemoteShiksha</div>
+  <button class="btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="dashboard">
+
+  <p id="welcome"></p>
+
+  <!-- STUDENT -->
+  <div id="studentCourses" style="display:none;">
+
+    <div class="section">
+      <h3>My Courses</h3>
+      <div id="myCourseList" class="grid"></div>
+    </div>
+
+    <div class="section">
+      <h3>My Quiz Results</h3>
+      <div id="resultList" class="grid"></div>
+    </div>
+
+    <div class="section">
+      <h3>Available Courses</h3>
+      <div id="availableCourseList" class="grid"></div>
+    </div>
+
+  </div>
+
+  <!-- TEACHER -->
+  <div id="teacherCourses" style="display:none;">
+    <div class="section">
+      <h3>Courses You Teach</h3>
+      <div id="teacherCourseList" class="grid"></div>
+    </div>
+  </div>
+
+  <!-- CREATE COURSE -->
+  <div id="teacherPanel" style="display:none;" class="section">
+    <h3>Create New Course</h3>
+
+    <div class="card form-card">
+      <div class="form-group">
+        <label>Course Title</label>
+        <input id="courseTitleInput" placeholder="Enter course title">
+      </div>
+
+      <div class="form-group">
+        <label>Course Description</label>
+        <textarea id="courseDescriptionInput" placeholder="Enter course description"></textarea>
+      </div>
+
+      <button class="btn" onclick="createCourse()">Create Course</button>
+      <p id="message"></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user) {
+  window.location.href = "index.html";
+}
+
+document.getElementById("welcome").innerText =
+  "Welcome " + user.name + " (" + user.role + ")";
+
+const API = "http://localhost:5000/api";
+
+
+// -------------------- STUDENT DASHBOARD --------------------
+
+async function loadStudentCourses() {
+  document.getElementById("studentCourses").style.display = "block";
+
+  try {
+    const myResponse = await fetch(API + "/course/my-courses", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const myData = await myResponse.json();
+    const myList = document.getElementById("myCourseList");
+    myList.innerHTML = "";
+
+    if (myData.courses.length === 0) {
+      myList.innerHTML = `<p style="color:#888; font-size:14px;">You haven't enrolled in any courses yet.</p>`;
+    }
+
+    myData.courses.forEach(course => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+      card.innerHTML = `
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">Enrolled course</div>
+        <button class="btn" onclick="window.location.href='course.html?id=${course._id}'">
+          View Course
+        </button>
+      `;
+      myList.appendChild(card);
+    });
+
+    const allResponse = await fetch(API + "/course/all", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const allData = await allResponse.json();
+    const availableList = document.getElementById("availableCourseList");
+    availableList.innerHTML = "";
+
+    const myCourseIds = myData.courses.map(c => c._id);
+
+    const unenrolled = allData.courses.filter(c => !myCourseIds.includes(c._id));
+
+    if (unenrolled.length === 0) {
+      availableList.innerHTML = `<p style="color:#888; font-size:14px;">No new courses available.</p>`;
+    }
+
+    unenrolled.forEach(course => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+      card.innerHTML = `
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">By ${course.teacher ? course.teacher.name : "Unknown"}</div>
+        <button class="btn" onclick="enrollCourse('${course._id}')">Enroll</button>
+      `;
+      availableList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading student courses", error);
+  }
+}
+
+
+// -------------------- LOAD QUIZ RESULTS --------------------
+
+async function loadResults() {
+  try {
+    const response = await fetch(API + "/result/my-results", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const results = await response.json();
+    const resultList = document.getElementById("resultList");
+    resultList.innerHTML = "";
+
+    if (results.length === 0) {
+      resultList.innerHTML = `<p style="color:#888; font-size:14px;">No quiz results yet. Attempt a quiz to see your scores here!</p>`;
+      return;
+    }
+
+    results.forEach(result => {
+      const percentage = Math.round((result.score / result.total) * 100);
+
+      // Color based on score
+      let color, label;
+      if (percentage >= 80) {
+        color = "#38a169"; label = "Excellent";
+      } else if (percentage >= 50) {
+        color = "#d69e2e"; label = "Good";
+      } else {
+        color = "#e53e3e"; label = "Needs Work";
+      }
+
+      const card = document.createElement("div");
+      card.className = "course-card";
+
+      card.innerHTML = `
+        <div class="course-title">${result.quiz ? result.quiz.title : "Quiz"}</div>
+        <div class="course-meta" style="margin-bottom: 10px;">
+          Attempted on ${new Date(result.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+            <span>Score: <strong>${result.score}/${result.total}</strong></span>
+            <span style="color: ${color}; font-weight: 600;">${percentage}%</span>
+          </div>
+
+          <div style="background: #e2e8f0; border-radius: 999px; height: 8px; overflow: hidden;">
+            <div style="width: ${percentage}%; background: ${color}; height: 100%; border-radius: 999px; transition: width 0.5s ease;"></div>
+          </div>
+        </div>
+
+        <span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: ${color}20; color: ${color};">
+          ${label}
+        </span>
+      `;
+
+      resultList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading results", error);
+  }
+}
+
+
+// -------------------- TEACHER DASHBOARD --------------------
+
+async function loadTeacherCourses() {
+  document.getElementById("teacherCourses").style.display = "block";
+  document.getElementById("teacherPanel").style.display = "block";
+
+  try {
+    const response = await fetch(API + "/course/my-teaching", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await response.json();
+    const courseList = document.getElementById("teacherCourseList");
+    courseList.innerHTML = "";
+
+    if (data.courses.length === 0) {
+      courseList.innerHTML = `<p style="color:#888; font-size:14px;">You haven't created any courses yet.</p>`;
+    }
+
+    data.courses.forEach(course => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+      card.innerHTML = `
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">Your course</div>
+        <button class="btn" onclick="window.location.href='course.html?id=${course._id}'">
+          Manage
+        </button>
+      `;
+      courseList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading teacher courses", error);
+  }
+}
+
+
+// -------------------- CREATE COURSE --------------------
+
+async function createCourse() {
+  const title = document.getElementById("courseTitleInput").value;
+  const description = document.getElementById("courseDescriptionInput").value;
+
+  if (!title || !description) {
+    document.getElementById("message").innerText = "Title and description are required";
+    return;
+  }
+
+  try {
+    const response = await fetch(API + "/course/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, description })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("message").innerText = "Course created successfully";
+      document.getElementById("courseTitleInput").value = "";
+      document.getElementById("courseDescriptionInput").value = "";
+      loadTeacherCourses();
+    } else {
+      document.getElementById("message").innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log("Error creating course", error);
+  }
+}
+
+
+// -------------------- ENROLL COURSE --------------------
+
+async function enrollCourse(courseId) {
+  try {
+    const response = await fetch(API + "/course/" + courseId + "/enroll", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      loadStudentCourses();
+    } else {
+      alert(data.message);
+    }
+
+  } catch (error) {
+    console.log("Error enrolling", error);
+  }
+}
+
+
+// -------------------- LOGOUT --------------------
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
+
+// -------------------- INITIAL LOAD --------------------
+
+if (user.role === "student") {
+  loadStudentCourses();
+  loadResults();
+}
+
+if (user.role === "teacher") {
+  loadTeacherCourses();
+}
+</script>
+
+</body>
+</html>

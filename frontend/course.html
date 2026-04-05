@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Course</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 🔝 NAVBAR -->
+<div class="navbar">
+  <div class="nav-title">Course</div>
+  <button class="btn" onclick="goBack()">Back</button>
+</div>
+
+<div class="dashboard">
+
+  <h2 id="courseTitle"></h2>
+
+  <!-- LIVE STREAM SECTION -->
+  <div id="liveSection" class="section" style="display:none;">
+
+    <div id="liveBadge" style="display:none; margin-bottom: 12px;">
+      <span style="background:#e53e3e; color:white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+        🔴 LIVE NOW
+      </span>
+    </div>
+
+    <div id="livePlayer" style="display:none;">
+      <iframe
+        id="liveIframe"
+        width="100%"
+        height="400"
+        src=""
+        frameborder="0"
+        allowfullscreen
+        style="border-radius: 8px;"
+      ></iframe>
+    </div>
+
+    <div id="noStreamMsg" style="display:none;">
+      <div class="card form-card">
+        <p style="color: #888;">No live lecture at the moment. Check back later!</p>
+      </div>
+    </div>
+
+    <div id="teacherLivePanel" style="display:none;" class="card form-card">
+      <h3 style="margin-bottom: 12px;">Live Stream Controls</h3>
+
+      <div id="goLiveForm">
+        <div class="form-group">
+          <label>YouTube Live Video ID</label>
+          <input id="youtubeVideoId" placeholder="e.g. dQw4w9WgXcQ">
+          <p style="font-size: 12px; color: #888; margin-top: 4px;">
+            Get the video ID from your YouTube Live URL:<br>
+            youtube.com/watch?v=<strong>THIS_PART</strong>
+          </p>
+        </div>
+        <button class="btn" onclick="goLive()">🔴 Go Live</button>
+      </div>
+
+      <div id="endLiveForm" style="display:none;">
+        <p style="color: #e53e3e; margin-bottom: 12px;">Stream is currently live.</p>
+        <button class="btn" onclick="endLive()">⏹ End Stream</button>
+      </div>
+
+      <p id="liveMessage" style="margin-top: 8px;"></p>
+    </div>
+
+  </div>
+
+  <!-- LECTURES -->
+  <div class="section">
+    <h3>Lectures</h3>
+    <div id="lectureList" class="grid"></div>
+  </div>
+
+  <!-- INLINE EDIT FORM (hidden by default) -->
+  <div id="editLectureSection" style="display:none;" class="section">
+    <h3>Edit Lecture</h3>
+    <div class="card form-card">
+      <div class="form-group">
+        <label>Lecture Title</label>
+        <input id="editLectureTitle" placeholder="Edit lecture title">
+      </div>
+      <div class="form-group">
+        <label>Lecture Content</label>
+        <textarea id="editLectureContent" placeholder="Edit lecture content" style="min-height: 150px;"></textarea>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="saveEditLecture()">Save Changes</button>
+        <button class="btn" onclick="cancelEdit()">Cancel</button>
+      </div>
+      <p id="editMessage" style="margin-top: 8px;"></p>
+    </div>
+  </div>
+
+  <!-- QUIZZES -->
+  <div class="section">
+    <h3>Quizzes</h3>
+    <div id="quizList" class="grid"></div>
+  </div>
+
+  <!-- TEACHER LECTURE PANEL -->
+  <div id="teacherPanel" style="display:none;" class="section">
+    <h3>Add New Lecture</h3>
+    <div class="card form-card">
+      <div class="form-group">
+        <label>Lecture Title</label>
+        <input id="lectureTitle" placeholder="Enter lecture title">
+      </div>
+      <div class="form-group">
+        <label>Lecture Content</label>
+        <textarea id="lectureContent" placeholder="Enter lecture content"></textarea>
+      </div>
+      <button class="btn" onclick="createLecture()">Add Lecture</button>
+      <p id="message"></p>
+    </div>
+  </div>
+
+  <!-- TEACHER QUIZ PANEL -->
+  <div id="quizTeacherPanel" style="display:none;" class="section">
+    <h3>Create Quiz</h3>
+    <div class="card form-card">
+      <div class="form-group">
+        <label>Quiz Title</label>
+        <input id="quizTitle" placeholder="Enter quiz title">
+      </div>
+      <div class="form-group">
+        <label>Duration (minutes)</label>
+        <input id="quizDuration" type="number" placeholder="e.g. 10" min="1" max="180">
+      </div>
+      <button class="btn" onclick="createQuiz()">Create Quiz</button>
+      <p id="quizMessage"></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user) {
+  window.location.href = "index.html";
+}
+
+const params = new URLSearchParams(window.location.search);
+const courseId = params.get("id");
+
+const API = "http://localhost:5000/api";
+
+let currentEditId = null;
+
+// SHOW TEACHER PANELS
+if (user.role === "teacher") {
+  document.getElementById("teacherPanel").style.display = "block";
+  document.getElementById("quizTeacherPanel").style.display = "block";
+  document.getElementById("teacherLivePanel").style.display = "block";
+}
+
+
+// LOAD COURSE
+async function loadCourse() {
+  try {
+    const response = await fetch(API + "/course/" + courseId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const course = await response.json();
+
+    document.getElementById("courseTitle").innerText = course.title;
+
+    const liveSection = document.getElementById("liveSection");
+    liveSection.style.display = "block";
+
+    const { isLive, youtubeUrl } = course.liveStream;
+
+    if (isLive && youtubeUrl) {
+      document.getElementById("liveBadge").style.display = "block";
+      document.getElementById("liveIframe").src =
+        "https://www.youtube.com/embed/" + youtubeUrl + "?autoplay=1";
+      document.getElementById("livePlayer").style.display = "block";
+
+      if (user.role === "teacher") {
+        document.getElementById("goLiveForm").style.display = "none";
+        document.getElementById("endLiveForm").style.display = "block";
+      }
+    } else {
+      if (user.role === "student") {
+        document.getElementById("noStreamMsg").style.display = "block";
+      }
+      if (user.role === "teacher") {
+        document.getElementById("goLiveForm").style.display = "block";
+        document.getElementById("endLiveForm").style.display = "none";
+      }
+    }
+
+  } catch (error) {
+    console.log("Error loading course", error);
+  }
+}
+
+
+// GO LIVE
+async function goLive() {
+  const videoId = document.getElementById("youtubeVideoId").value.trim();
+
+  if (!videoId) {
+    document.getElementById("liveMessage").innerText = "Please enter a YouTube Video ID";
+    return;
+  }
+
+  try {
+    const response = await fetch(API + "/course/" + courseId + "/go-live", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ youtubeUrl: videoId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("liveMessage").innerText = "Stream started!";
+      loadCourse();
+    } else {
+      document.getElementById("liveMessage").innerText = data.message;
+    }
+  } catch (error) {
+    console.log("Error going live", error);
+  }
+}
+
+
+// END LIVE
+async function endLive() {
+  if (!confirm("End the live stream?")) return;
+
+  try {
+    const response = await fetch(API + "/course/" + courseId + "/end-live", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("liveMessage").innerText = "Stream ended.";
+      loadCourse();
+    } else {
+      document.getElementById("liveMessage").innerText = data.message;
+    }
+  } catch (error) {
+    console.log("Error ending stream", error);
+  }
+}
+
+
+// LOAD LECTURES
+async function loadLectures() {
+  try {
+    const response = await fetch(API + "/lecture/course/" + courseId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const lectures = await response.json();
+
+    const lectureList = document.getElementById("lectureList");
+    lectureList.innerHTML = "";
+
+    lectures.forEach(lecture => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+
+      card.innerHTML = `
+        <div class="course-title">${lecture.title}</div>
+        <div class="course-meta">Lecture</div>
+        <div class="button-group">
+          <button class="btn" onclick="window.location.href='lecture.html?id=${lecture._id}'">Open</button>
+          ${user.role === "teacher" ? `
+            <button class="btn" onclick="editLecture(${JSON.stringify(lecture).replace(/"/g, '&quot;')})">Edit</button>
+            <button class="btn" onclick="deleteLecture('${lecture._id}')">Delete</button>
+          ` : ""}
+        </div>
+      `;
+
+      lectureList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading lectures", error);
+  }
+}
+
+
+// EDIT LECTURE
+function editLecture(lecture) {
+  currentEditId = lecture._id;
+
+  document.getElementById("editLectureTitle").value = lecture.title;
+  document.getElementById("editLectureContent").value = lecture.content;
+  document.getElementById("editMessage").innerText = "";
+
+  const editSection = document.getElementById("editLectureSection");
+  editSection.style.display = "block";
+  editSection.scrollIntoView({ behavior: "smooth" });
+}
+
+
+// SAVE EDIT
+async function saveEditLecture() {
+  const title = document.getElementById("editLectureTitle").value.trim();
+  const content = document.getElementById("editLectureContent").value.trim();
+
+  if (!title || !content) {
+    document.getElementById("editMessage").innerText = "Title and content cannot be empty";
+    return;
+  }
+
+  try {
+    const response = await fetch(API + "/lecture/" + currentEditId, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, content })
+    });
+
+    if (response.ok) {
+      document.getElementById("editMessage").innerText = "Lecture updated!";
+      setTimeout(() => {
+        document.getElementById("editLectureSection").style.display = "none";
+        currentEditId = null;
+        loadLectures();
+      }, 800);
+    } else {
+      const data = await response.json();
+      document.getElementById("editMessage").innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log("Error updating lecture", error);
+  }
+}
+
+
+// CANCEL EDIT
+function cancelEdit() {
+  document.getElementById("editLectureSection").style.display = "none";
+  document.getElementById("editMessage").innerText = "";
+  currentEditId = null;
+}
+
+
+// CREATE LECTURE
+async function createLecture() {
+  const title = document.getElementById("lectureTitle").value;
+  const content = document.getElementById("lectureContent").value;
+
+  try {
+    const response = await fetch(API + "/lecture/create/" + courseId, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, content })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("message").innerText = "Lecture added successfully";
+      document.getElementById("lectureTitle").value = "";
+      document.getElementById("lectureContent").value = "";
+      loadLectures();
+    } else {
+      document.getElementById("message").innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log("Error creating lecture", error);
+  }
+}
+
+
+// CREATE QUIZ
+async function createQuiz() {
+  const title = document.getElementById("quizTitle").value;
+  const duration = parseInt(document.getElementById("quizDuration").value) || 10;
+
+  if (!title) {
+    document.getElementById("quizMessage").innerText = "Quiz title required";
+    return;
+  }
+
+  try {
+    const response = await fetch(API + "/quiz/create/" + courseId, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, duration })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("quizMessage").innerText = `Quiz created with ${duration} minute timer!`;
+      document.getElementById("quizTitle").value = "";
+      document.getElementById("quizDuration").value = "";
+      loadQuizzes();
+    } else {
+      document.getElementById("quizMessage").innerText = data.message;
+    }
+
+  } catch (error) {
+    console.log("Error creating quiz", error);
+  }
+}
+
+
+// LOAD QUIZZES
+async function loadQuizzes() {
+  try {
+    const response = await fetch(API + "/quiz/course/" + courseId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const quizzes = await response.json();
+
+    const quizList = document.getElementById("quizList");
+    quizList.innerHTML = "";
+
+    quizzes.forEach(quiz => {
+      const card = document.createElement("div");
+      card.className = "course-card";
+
+      card.innerHTML = `
+        <div class="course-title">${quiz.title}</div>
+        <div class="course-meta">⏱ ${quiz.duration || 10} min</div>
+        <div class="button-group">
+          ${user.role === "student"
+            ? `<button class="btn" onclick="window.location.href='quiz.html?id=${quiz._id}'">Attempt</button>`
+            : `<button class="btn" onclick="window.location.href='quiz.html?id=${quiz._id}'">Edit</button>`
+          }
+          ${user.role === "teacher"
+            ? `<button class="btn" onclick="deleteQuiz('${quiz._id}')">Delete</button>`
+            : ""
+          }
+        </div>
+      `;
+
+      quizList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error loading quizzes", error);
+  }
+}
+
+
+// DELETE LECTURE
+async function deleteLecture(id) {
+  if (!confirm("Delete this lecture?")) return;
+
+  try {
+    const response = await fetch(API + "/lecture/" + id, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (response.ok) loadLectures();
+
+  } catch (error) {
+    console.log("Error deleting lecture", error);
+  }
+}
+
+
+// DELETE QUIZ
+async function deleteQuiz(id) {
+  if (!confirm("Delete this quiz?")) return;
+
+  try {
+    const response = await fetch(API + "/quiz/" + id, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (response.ok) loadQuizzes();
+
+  } catch (error) {
+    console.log("Error deleting quiz", error);
+  }
+}
+
+
+// BACK
+function goBack() {
+  window.location.href = "dashboard.html";
+}
+
+
+// INITIAL LOAD
+loadCourse();
+loadLectures();
+loadQuizzes();
+
+</script>
+
+</body>
+</html>

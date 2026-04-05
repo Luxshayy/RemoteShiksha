@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lecture</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 🔝 NAVBAR -->
+<div class="navbar">
+  <div class="nav-title">Lecture</div>
+  <button class="btn" onclick="goBack()">Back</button>
+</div>
+
+<div class="dashboard">
+
+  <!-- LECTURE CONTENT -->
+  <div class="card lecture-card">
+    <h2 id="lectureTitle"></h2>
+    <p id="lectureContent" class="lecture-content"></p>
+  </div>
+
+  <!-- ATTACHMENTS SECTION -->
+  <div class="section">
+    <h3>Attachments</h3>
+
+    <div id="attachmentList"></div>
+
+    <!-- TEACHER UPLOAD PANEL -->
+    <div id="uploadPanel" style="display:none;" class="card form-card">
+      <h3 style="margin-bottom: 12px;">Upload File</h3>
+
+      <div class="form-group">
+        <label>Choose File (Max 10MB)</label>
+        <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx">
+      </div>
+
+      <div id="uploadProgress" style="display:none; margin-bottom: 10px;">
+        <p style="color: #888; font-size: 13px;">⏳ Uploading to Cloudinary, please wait...</p>
+      </div>
+
+      <button class="btn" onclick="uploadFile()">Upload</button>
+      <p id="uploadMessage" style="margin-top: 8px;"></p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user) {
+  window.location.href = "index.html";
+}
+
+const params = new URLSearchParams(window.location.search);
+const lectureId = params.get("id");
+
+const API = "http://localhost:5000/api";
+
+
+// SHOW UPLOAD PANEL FOR TEACHER
+if (user.role === "teacher") {
+  document.getElementById("uploadPanel").style.display = "block";
+}
+
+
+// LOAD LECTURE
+async function loadLecture() {
+  try {
+    const response = await fetch(API + "/lecture/" + lectureId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const lecture = await response.json();
+
+    document.getElementById("lectureTitle").innerText = lecture.title;
+    document.getElementById("lectureContent").innerText = lecture.content;
+
+    renderAttachments(lecture.attachments || []);
+
+  } catch (error) {
+    console.log("Error loading lecture", error);
+  }
+}
+
+
+// RENDER ATTACHMENTS
+function renderAttachments(attachments) {
+  const list = document.getElementById("attachmentList");
+  list.innerHTML = "";
+
+  if (attachments.length === 0) {
+    list.innerHTML = `<p style="color: #888; font-size: 14px;">No attachments yet.</p>`;
+    return;
+  }
+
+  attachments.forEach(attachment => {
+    const card = document.createElement("div");
+    card.className = "card form-card";
+    card.style.marginBottom = "10px";
+
+    const icon = getFileIcon(attachment.resourceType, attachment.filename);
+    const preview = getPreview(attachment);
+
+    card.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">${icon}</span>
+          <div>
+            <div style="font-weight: 500; font-size: 14px;">${attachment.filename}</div>
+            <div style="font-size: 12px; color: #888;">${attachment.resourceType}</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <a href="${attachment.url}" target="_blank" class="btn" style="text-decoration:none;">View</a>
+          ${user.role === "teacher"
+            ? `<button class="btn" onclick="deleteAttachment('${attachment._id}')">Delete</button>`
+            : ""
+          }
+        </div>
+      </div>
+      ${preview}
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+
+// GET FILE ICON
+function getFileIcon(resourceType, filename) {
+  if (resourceType === "image") return "🖼️";
+  if (resourceType === "video") return "🎬";
+  const ext = filename.split(".").pop().toLowerCase();
+  if (ext === "pdf") return "📄";
+  if (["doc", "docx"].includes(ext)) return "📝";
+  if (["ppt", "pptx"].includes(ext)) return "📊";
+  return "📎";
+}
+
+
+// GET INLINE PREVIEW
+function getPreview(attachment) {
+  if (attachment.resourceType === "image") {
+    return `
+      <div style="margin-top: 10px;">
+        <img src="${attachment.url}" alt="${attachment.filename}"
+          style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain;">
+      </div>`;
+  }
+  if (attachment.resourceType === "video") {
+    return `
+      <div style="margin-top: 10px;">
+        <video controls style="width: 100%; border-radius: 8px; max-height: 300px;">
+          <source src="${attachment.url}">
+          Your browser does not support video playback.
+        </video>
+      </div>`;
+  }
+  return "";
+}
+
+
+// UPLOAD FILE
+async function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    document.getElementById("uploadMessage").innerText = "Please select a file first";
+    return;
+  }
+
+  // Check file size — 10MB max (Cloudinary free tier limit)
+  const maxSize = 10 * 1024 * 1024;
+  if (file.size > maxSize) {
+    document.getElementById("uploadMessage").style.color = "#e53e3e";
+    document.getElementById("uploadMessage").innerText =
+      `❌ File too large! Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.`;
+    document.getElementById("fileInput").value = "";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  document.getElementById("uploadProgress").style.display = "block";
+  document.getElementById("uploadMessage").innerText = "";
+
+  try {
+    const response = await fetch(API + "/lecture/" + lectureId + "/upload", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("uploadProgress").style.display = "none";
+
+    if (response.ok) {
+      document.getElementById("uploadMessage").style.color = "#38a169";
+      document.getElementById("uploadMessage").innerText = "✅ File uploaded successfully!";
+      document.getElementById("fileInput").value = "";
+      loadLecture();
+    } else {
+      document.getElementById("uploadMessage").style.color = "#e53e3e";
+      document.getElementById("uploadMessage").innerText = "❌ " + data.message;
+    }
+
+  } catch (error) {
+    document.getElementById("uploadProgress").style.display = "none";
+    document.getElementById("uploadMessage").style.color = "#e53e3e";
+    document.getElementById("uploadMessage").innerText = "❌ Upload failed, try again";
+    console.log("Error uploading file", error);
+  }
+}
+
+
+// DELETE ATTACHMENT
+async function deleteAttachment(attachmentId) {
+  if (!confirm("Delete this attachment?")) return;
+
+  try {
+    const response = await fetch(API + "/lecture/" + lectureId + "/attachment/" + attachmentId, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (response.ok) {
+      loadLecture();
+    } else {
+      const data = await response.json();
+      alert(data.message);
+    }
+
+  } catch (error) {
+    console.log("Error deleting attachment", error);
+  }
+}
+
+
+// BACK
+function goBack() {
+  window.history.back();
+}
+
+
+// INITIAL LOAD
+loadLecture();
+</script>
+
+</body>
+</html>

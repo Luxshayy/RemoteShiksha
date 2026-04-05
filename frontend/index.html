@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RemoteShiksha - Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="auth-page">
+
+<div class="auth-card">
+
+  <h1 class="auth-title">RemoteShiksha</h1>
+  <p class="auth-subtitle">Welcome back! Please login</p>
+
+  <form id="loginForm">
+
+    <input type="email" id="email" placeholder="Email" required>
+
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button class="btn" type="submit">Login</button>
+
+  </form>
+
+  <p id="message"></p>
+
+  <br>
+
+  <p>
+    Don't have an account?
+    <a href="register.html">Register</a>
+  </p>
+
+  <br>
+
+  <button class="btn" onclick="goHome()">Back to Home</button>
+
+</div>
+
+<script src="js/auth.js"></script>
+
+<script>
+function goHome(){
+  window.location.href = "home.html";
+}
+</script>
+
+</body>
+</html>
