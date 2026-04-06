@@ -353,6 +353,9 @@ textarea:focus {
   font-size: 15px;
   min-height: 52px;
   line-height: 1.4;
+  position: relative;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .option:hover {
@@ -367,6 +370,9 @@ textarea:focus {
   margin: 0;
   accent-color: #6366f1;
   flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
 }
 
 /* ========================= */
