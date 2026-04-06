@@ -62,7 +62,7 @@ h1, h2, h3 {
 /* ========================= */
 /* INPUT */
 /* ========================= */
-input, select {
+input:not([type="radio"]):not([type="checkbox"]), select {
   width: 100%;
   padding: 13px 16px;
   margin: 8px 0;
@@ -75,6 +75,11 @@ input, select {
   outline: none;
   -webkit-appearance: none;
   appearance: none;
+}
+
+input:not([type="radio"]):not([type="checkbox"]):focus, select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 input:focus, select:focus {
