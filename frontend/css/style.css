@@ -20,14 +20,14 @@ body {
 
 /* CONTAINER */
 .container {
-  width: 90%;
+  width: 92%;
   max-width: 1100px;
-  margin: 40px auto;
+  margin: 24px auto;
 }
 
 /* HEADINGS */
 h1, h2, h3 {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 /* ========================= */
@@ -35,17 +35,18 @@ h1, h2, h3 {
 /* ========================= */
 .btn {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: white;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   font-family: 'Poppins', sans-serif;
   transition: all 0.25s ease;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  touch-action: manipulation;
 }
 
 .btn:hover {
@@ -63,15 +64,17 @@ h1, h2, h3 {
 /* ========================= */
 input, select {
   width: 100%;
-  padding: 11px 14px;
+  padding: 13px 16px;
   margin: 8px 0;
   border-radius: 10px;
   border: 2px solid #e5e7eb;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   background: white;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 input:focus, select:focus {
@@ -82,13 +85,13 @@ input:focus, select:focus {
 /* TEXTAREA */
 textarea {
   width: 100%;
-  padding: 11px 14px;
+  padding: 13px 16px;
   border-radius: 10px;
   border: 2px solid #e5e7eb;
-  min-height: 100px;
+  min-height: 110px;
   resize: vertical;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   background: white;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
@@ -104,10 +107,10 @@ textarea:focus {
 /* ========================= */
 .card {
   background: white;
-  padding: 24px;
+  padding: 20px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border: 1px solid rgba(255,255,255,0.8);
 }
 
@@ -115,17 +118,18 @@ textarea:focus {
 /* AUTH PAGES */
 /* ========================= */
 .auth-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px 20px;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 380px;
-  padding: 44px 36px;
+  max-width: 420px;
+  padding: 36px 28px;
   border-radius: 20px;
   background: white;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -134,7 +138,7 @@ textarea:focus {
 
 .auth-title {
   margin-bottom: 8px;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   -webkit-background-clip: text;
@@ -145,15 +149,16 @@ textarea:focus {
 .auth-subtitle {
   font-size: 14px;
   color: #888;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .auth-card form {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .auth-card input {
   margin-bottom: 12px;
+  font-size: 16px;
 }
 
 .auth-card a {
@@ -173,7 +178,7 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 40px;
+  padding: 14px 16px;
   background: white;
   box-shadow: 0 2px 16px rgba(99, 102, 241, 0.1);
   position: sticky;
@@ -184,7 +189,7 @@ textarea:focus {
 }
 
 .nav-title {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   -webkit-background-clip: text;
@@ -194,39 +199,40 @@ textarea:focus {
 
 .navbar .btn {
   width: auto;
-  padding: 8px 18px;
-  font-size: 13px;
+  padding: 9px 18px;
+  font-size: 14px;
+  box-shadow: none;
 }
 
 /* ========================= */
 /* DASHBOARD */
 /* ========================= */
 .dashboard {
-  width: 90%;
+  width: 94%;
   max-width: 1100px;
-  margin: 30px auto;
+  margin: 20px auto;
 }
 
 .section {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .section h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #4f46e5;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   padding-left: 12px;
   border-left: 4px solid #8b5cf6;
 }
 
 /* ========================= */
-/* GRID */
+/* GRID — mobile first: 1 column */
 /* ========================= */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 /* ========================= */
@@ -234,7 +240,7 @@ textarea:focus {
 /* ========================= */
 .course-card {
   background: white;
-  padding: 22px;
+  padding: 18px;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
   transition: all 0.25s ease;
@@ -254,22 +260,22 @@ textarea:focus {
 }
 
 .course-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(99, 102, 241, 0.2);
   border-color: #e0e7ff;
 }
 
 .course-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #1e1b4b;
 }
 
 .course-meta {
   font-size: 13px;
   color: #888;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* ========================= */
@@ -281,7 +287,7 @@ textarea:focus {
 }
 
 .form-group label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #555;
   display: block;
@@ -289,7 +295,7 @@ textarea:focus {
 }
 
 .form-card {
-  max-width: 600px;
+  max-width: 100%;
   margin: auto;
 }
 
@@ -298,10 +304,8 @@ textarea:focus {
 /* ========================= */
 .course-card .btn {
   width: auto;
-  padding: 7px 14px;
-  font-size: 13px;
-  margin-right: 6px;
-  margin-top: 6px;
+  padding: 9px 16px;
+  font-size: 14px;
   box-shadow: none;
 }
 
@@ -316,15 +320,15 @@ textarea:focus {
 /* LECTURE PAGE */
 /* ========================= */
 .lecture-card {
-  max-width: 800px;
+  max-width: 100%;
   margin: auto;
-  padding: 36px;
+  padding: 20px;
 }
 
 .lecture-content {
-  margin-top: 20px;
+  margin-top: 16px;
   line-height: 1.8;
-  font-size: 16px;
+  font-size: 15px;
   color: #444;
   white-space: pre-line;
 }
@@ -339,14 +343,16 @@ textarea:focus {
 .option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  border-radius: 10px;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 12px;
   border: 2px solid #e5e7eb;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
+  font-size: 15px;
+  min-height: 52px;
+  line-height: 1.4;
 }
 
 .option:hover {
@@ -355,9 +361,12 @@ textarea:focus {
 }
 
 .option input[type="radio"] {
-  width: auto;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
   margin: 0;
   accent-color: #6366f1;
+  flex-shrink: 0;
 }
 
 /* ========================= */
@@ -384,12 +393,13 @@ textarea:focus {
   text-align: center;
   max-width: 560px;
   padding: 20px;
+  width: 100%;
 }
 
 .hero-title {
-  font-size: 48px;
+  font-size: 34px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -398,17 +408,17 @@ textarea:focus {
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: 16px;
   color: #666;
-  margin-bottom: 36px;
+  margin-bottom: 28px;
   line-height: 1.6;
 }
 
 .hero-buttons {
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
 }
 
 .btn.outline {
@@ -429,9 +439,9 @@ textarea:focus {
 /* WELCOME TEXT */
 /* ========================= */
 #welcome {
-  font-size: 15px;
+  font-size: 14px;
   color: #666;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   font-weight: 500;
 }
 
@@ -439,7 +449,7 @@ textarea:focus {
 /* SCROLLBAR */
 /* ========================= */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -452,27 +462,127 @@ textarea:focus {
 }
 
 /* ========================= */
-/* RESPONSIVE */
+/* TABLET 580px+ */
 /* ========================= */
-@media (max-width: 600px) {
+@media (min-width: 580px) {
+
   .navbar {
-    padding: 14px 20px;
+    padding: 16px 28px;
+  }
+
+  .nav-title {
+    font-size: 19px;
   }
 
   .dashboard {
-    width: 95%;
-  }
-
-  .hero-title {
-    font-size: 32px;
-  }
-
-  .auth-card {
-    margin: 20px;
-    padding: 32px 24px;
+    width: 92%;
+    margin: 24px auto;
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .section h3 {
+    font-size: 17px;
+  }
+
+  .course-title {
+    font-size: 17px;
+  }
+
+  .form-card {
+    max-width: 540px;
+  }
+
+  .lecture-card {
+    padding: 28px;
+  }
+
+  .auth-card {
+    padding: 44px 40px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+  }
+
+  .hero-buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* ========================= */
+/* DESKTOP 900px+ */
+/* ========================= */
+@media (min-width: 900px) {
+
+  .navbar {
+    padding: 16px 40px;
+  }
+
+  .nav-title {
+    font-size: 20px;
+  }
+
+  .dashboard {
+    width: 90%;
+    margin: 30px auto;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .section h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .course-title {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  .course-meta {
+    margin-bottom: 16px;
+  }
+
+  .course-card {
+    padding: 22px;
+  }
+
+  .form-card {
+    max-width: 600px;
+  }
+
+  .lecture-card {
+    max-width: 800px;
+    padding: 36px;
+  }
+
+  .lecture-content {
+    font-size: 16px;
+  }
+
+  .hero-title {
+    font-size: 48px;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  .option {
+    font-size: 14px;
+    padding: 10px 14px;
+    min-height: 44px;
   }
 }
