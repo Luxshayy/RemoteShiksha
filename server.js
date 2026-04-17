@@ -13,6 +13,7 @@ const lectureRoutes = require('./routes/lecture');
 const quizRoutes = require('./routes/quiz');
 const resultRoutes = require("./routes/result");
 const adminRoutes = require("./routes/admin");
+const doubtRoutes = require("./routes/doubt");
 
 const app = express();
 const server = http.createServer(app);
@@ -62,6 +63,7 @@ app.use('/api/lecture', lectureRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use("/api/result", resultRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/doubt", doubtRoutes);
 
 // ================= PROTECTED TEST ROUTES =================
 app.get('/api/protected', authMiddleware, (req, res) => {

@@ -26,11 +26,10 @@
       </span>
     </div>
 
-    <!-- ✅ VIDEO + CHAT SIDE BY SIDE -->
+    <!-- VIDEO + CHAT SIDE BY SIDE -->
     <div id="livePlayer" style="display:none;">
       <div style="display: flex; gap: 16px; align-items: flex-start;">
 
-        <!-- YouTube Embed -->
         <div style="flex: 2; min-width: 0;">
           <iframe
             id="liveIframe"
@@ -43,10 +42,8 @@
           ></iframe>
         </div>
 
-        <!-- Live Chat -->
         <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; height: 400px;">
           <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">💬 Live Chat</div>
-
           <div id="chatMessages" style="
             flex: 1;
             background: white;
@@ -56,20 +53,12 @@
             padding: 12px;
             font-size: 13px;
           "></div>
-
           <div style="display: flex;">
             <input
               type="text"
               id="chatInput"
               placeholder="Type a message..."
-              style="
-                flex: 1;
-                margin: 0;
-                border-radius: 0 0 0 12px;
-                border-top: none;
-                font-size: 13px;
-                padding: 10px 14px;
-              "
+              style="flex:1; margin:0; border-radius:0 0 0 12px; border-top:none; font-size:13px; padding:10px 14px;"
               onkeydown="if(event.key==='Enter') sendChat()"
             >
             <button onclick="sendChat()" style="
@@ -95,9 +84,8 @@
       </div>
     </div>
 
-    <div id="teacherLivePanel" style="display:none;" class="card form-card">
+    <div id="teacherLivePanel" style="display:none; margin-top: 16px;" class="card form-card">
       <h3 style="margin-bottom: 12px;">Live Stream Controls</h3>
-
       <div id="goLiveForm">
         <div class="form-group">
           <label>YouTube Live Video ID</label>
@@ -109,12 +97,10 @@
         </div>
         <button class="btn" onclick="goLive()">🔴 Go Live</button>
       </div>
-
       <div id="endLiveForm" style="display:none;">
         <p style="color: #e53e3e; margin-bottom: 12px;">Stream is currently live.</p>
         <button class="btn" onclick="endLive()">⏹ End Stream</button>
       </div>
-
       <p id="liveMessage" style="margin-top: 8px;"></p>
     </div>
 
@@ -126,7 +112,7 @@
     <div id="lectureList" class="grid"></div>
   </div>
 
-  <!-- INLINE EDIT FORM (hidden by default) -->
+  <!-- INLINE EDIT FORM -->
   <div id="editLectureSection" style="display:none;" class="section">
     <h3>Edit Lecture</h3>
     <div class="card form-card">
@@ -150,6 +136,24 @@
   <div class="section">
     <h3>Quizzes</h3>
     <div id="quizList" class="grid"></div>
+  </div>
+
+  <!-- ✅ DOUBT SECTION -->
+  <div class="section">
+    <h3>❓ Doubts</h3>
+
+    <!-- Post a doubt -->
+    <div class="card form-card" style="margin-bottom: 20px;">
+      <div class="form-group">
+        <label>Ask a doubt</label>
+        <textarea id="doubtInput" placeholder="Type your doubt here..." style="min-height: 80px;"></textarea>
+      </div>
+      <button class="btn" onclick="postDoubt()">Post Doubt</button>
+      <p id="doubtMessage" style="margin-top: 8px;"></p>
+    </div>
+
+    <!-- Doubts list -->
+    <div id="doubtList"></div>
   </div>
 
   <!-- TEACHER LECTURE PANEL -->
@@ -229,7 +233,6 @@ socket.on("receive-message", ({ message, sender, role, time }) => {
       word-break: break-word;
     ">${message}</div>
   `;
-
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 });
@@ -254,16 +257,13 @@ if (user.role === "teacher") {
   document.getElementById("teacherLivePanel").style.display = "block";
 }
 
-
-// LOAD COURSE
+// ================= LOAD COURSE =================
 async function loadCourse() {
   try {
     const response = await fetch(API + "/course/" + courseId, {
       headers: { "Authorization": "Bearer " + token }
     });
-
     const course = await response.json();
-
     document.getElementById("courseTitle").innerText = course.title;
 
     const liveSection = document.getElementById("liveSection");
@@ -276,7 +276,6 @@ async function loadCourse() {
       document.getElementById("liveIframe").src =
         "https://www.youtube.com/embed/" + youtubeUrl + "?autoplay=1";
       document.getElementById("livePlayer").style.display = "block";
-
       if (user.role === "teacher") {
         document.getElementById("goLiveForm").style.display = "none";
         document.getElementById("endLiveForm").style.display = "block";
@@ -290,34 +289,25 @@ async function loadCourse() {
         document.getElementById("endLiveForm").style.display = "none";
       }
     }
-
   } catch (error) {
     console.log("Error loading course", error);
   }
 }
 
-
-// GO LIVE
+// ================= GO LIVE =================
 async function goLive() {
   const videoId = document.getElementById("youtubeVideoId").value.trim();
-
   if (!videoId) {
     document.getElementById("liveMessage").innerText = "Please enter a YouTube Video ID";
     return;
   }
-
   try {
     const response = await fetch(API + "/course/" + courseId + "/go-live", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ youtubeUrl: videoId })
     });
-
     const data = await response.json();
-
     if (response.ok) {
       document.getElementById("liveMessage").innerText = "Stream started!";
       loadCourse();
@@ -329,19 +319,15 @@ async function goLive() {
   }
 }
 
-
-// END LIVE
+// ================= END LIVE =================
 async function endLive() {
   if (!confirm("End the live stream?")) return;
-
   try {
     const response = await fetch(API + "/course/" + courseId + "/end-live", {
       method: "POST",
       headers: { "Authorization": "Bearer " + token }
     });
-
     const data = await response.json();
-
     if (response.ok) {
       document.getElementById("liveMessage").innerText = "Stream ended.";
       loadCourse();
@@ -353,23 +339,18 @@ async function endLive() {
   }
 }
 
-
-// LOAD LECTURES
+// ================= LOAD LECTURES =================
 async function loadLectures() {
   try {
     const response = await fetch(API + "/lecture/course/" + courseId, {
       headers: { "Authorization": "Bearer " + token }
     });
-
     const lectures = await response.json();
-
     const lectureList = document.getElementById("lectureList");
     lectureList.innerHTML = "";
-
     lectures.forEach(lecture => {
       const card = document.createElement("div");
       card.className = "course-card";
-
       card.innerHTML = `
         <div class="course-title">${lecture.title}</div>
         <div class="course-meta">Lecture</div>
@@ -381,50 +362,37 @@ async function loadLectures() {
           ` : ""}
         </div>
       `;
-
       lectureList.appendChild(card);
     });
-
   } catch (error) {
     console.log("Error loading lectures", error);
   }
 }
 
-
-// EDIT LECTURE
+// ================= EDIT LECTURE =================
 function editLecture(lecture) {
   currentEditId = lecture._id;
-
   document.getElementById("editLectureTitle").value = lecture.title;
   document.getElementById("editLectureContent").value = lecture.content;
   document.getElementById("editMessage").innerText = "";
-
   const editSection = document.getElementById("editLectureSection");
   editSection.style.display = "block";
   editSection.scrollIntoView({ behavior: "smooth" });
 }
 
-
-// SAVE EDIT
 async function saveEditLecture() {
   const title = document.getElementById("editLectureTitle").value.trim();
   const content = document.getElementById("editLectureContent").value.trim();
-
   if (!title || !content) {
     document.getElementById("editMessage").innerText = "Title and content cannot be empty";
     return;
   }
-
   try {
     const response = await fetch(API + "/lecture/" + currentEditId, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ title, content })
     });
-
     if (response.ok) {
       document.getElementById("editMessage").innerText = "Lecture updated!";
       setTimeout(() => {
@@ -436,38 +404,28 @@ async function saveEditLecture() {
       const data = await response.json();
       document.getElementById("editMessage").innerText = data.message;
     }
-
   } catch (error) {
     console.log("Error updating lecture", error);
   }
 }
 
-
-// CANCEL EDIT
 function cancelEdit() {
   document.getElementById("editLectureSection").style.display = "none";
   document.getElementById("editMessage").innerText = "";
   currentEditId = null;
 }
 
-
-// CREATE LECTURE
+// ================= CREATE LECTURE =================
 async function createLecture() {
   const title = document.getElementById("lectureTitle").value;
   const content = document.getElementById("lectureContent").value;
-
   try {
     const response = await fetch(API + "/lecture/create/" + courseId, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ title, content })
     });
-
     const data = await response.json();
-
     if (response.ok) {
       document.getElementById("message").innerText = "Lecture added successfully";
       document.getElementById("lectureTitle").value = "";
@@ -476,35 +434,26 @@ async function createLecture() {
     } else {
       document.getElementById("message").innerText = data.message;
     }
-
   } catch (error) {
     console.log("Error creating lecture", error);
   }
 }
 
-
-// CREATE QUIZ
+// ================= CREATE QUIZ =================
 async function createQuiz() {
   const title = document.getElementById("quizTitle").value;
   const duration = parseInt(document.getElementById("quizDuration").value) || 10;
-
   if (!title) {
     document.getElementById("quizMessage").innerText = "Quiz title required";
     return;
   }
-
   try {
     const response = await fetch(API + "/quiz/create/" + courseId, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ title, duration })
     });
-
     const data = await response.json();
-
     if (response.ok) {
       document.getElementById("quizMessage").innerText = `Quiz created with ${duration} minute timer!`;
       document.getElementById("quizTitle").value = "";
@@ -513,29 +462,23 @@ async function createQuiz() {
     } else {
       document.getElementById("quizMessage").innerText = data.message;
     }
-
   } catch (error) {
     console.log("Error creating quiz", error);
   }
 }
 
-
-// LOAD QUIZZES
+// ================= LOAD QUIZZES =================
 async function loadQuizzes() {
   try {
     const response = await fetch(API + "/quiz/course/" + courseId, {
       headers: { "Authorization": "Bearer " + token }
     });
-
     const quizzes = await response.json();
-
     const quizList = document.getElementById("quizList");
     quizList.innerHTML = "";
-
     quizzes.forEach(quiz => {
       const card = document.createElement("div");
       card.className = "course-card";
-
       card.innerHTML = `
         <div class="course-title">${quiz.title}</div>
         <div class="course-meta">⏱ ${quiz.duration || 10} min</div>
@@ -550,63 +493,210 @@ async function loadQuizzes() {
           }
         </div>
       `;
-
       quizList.appendChild(card);
     });
-
   } catch (error) {
     console.log("Error loading quizzes", error);
   }
 }
 
-
-// DELETE LECTURE
+// ================= DELETE LECTURE =================
 async function deleteLecture(id) {
   if (!confirm("Delete this lecture?")) return;
-
   try {
     const response = await fetch(API + "/lecture/" + id, {
       method: "DELETE",
       headers: { "Authorization": "Bearer " + token }
     });
-
     if (response.ok) loadLectures();
-
   } catch (error) {
     console.log("Error deleting lecture", error);
   }
 }
 
-
-// DELETE QUIZ
+// ================= DELETE QUIZ =================
 async function deleteQuiz(id) {
   if (!confirm("Delete this quiz?")) return;
-
   try {
     const response = await fetch(API + "/quiz/" + id, {
       method: "DELETE",
       headers: { "Authorization": "Bearer " + token }
     });
-
     if (response.ok) loadQuizzes();
-
   } catch (error) {
     console.log("Error deleting quiz", error);
   }
 }
 
+// ================= DOUBTS =================
+async function loadDoubts() {
+  try {
+    const response = await fetch(API + "/doubt/course/" + courseId, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const doubts = await response.json();
+    const list = document.getElementById("doubtList");
+    list.innerHTML = "";
 
-// BACK
+    if (doubts.length === 0) {
+      list.innerHTML = `<p style="color:#888; font-size:14px;">No doubts posted yet. Be the first to ask!</p>`;
+      return;
+    }
+
+    doubts.forEach(doubt => renderDoubt(doubt));
+  } catch (error) {
+    console.log("Error loading doubts", error);
+  }
+}
+
+function renderDoubt(doubt) {
+  const list = document.getElementById("doubtList");
+  const isMyDoubt = doubt.authorName === user.name;
+  const isTeacherOrAuthor = user.role === "teacher" || isMyDoubt;
+  const roleTag = doubt.authorRole === "teacher" ? " 👨‍🏫" : " 🎓";
+
+  const card = document.createElement("div");
+  card.className = "card form-card";
+  card.style.marginBottom = "16px";
+  card.setAttribute("data-doubt-id", doubt._id);
+
+  const repliesHTML = doubt.replies.map(reply => {
+    const isTeacherReply = reply.authorRole === "teacher";
+    return `
+      <div style="
+        margin-top: 10px;
+        padding: 10px 14px;
+        background: ${isTeacherReply ? "#ede9fe" : "#f3f4f6"};
+        border-left: 3px solid ${isTeacherReply ? "#8b5cf6" : "#d1d5db"};
+        border-radius: 0 8px 8px 0;
+        font-size: 13px;
+      ">
+        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+          ${reply.authorName}${reply.authorRole === "teacher" ? " 👨‍🏫" : " 🎓"} · ${new Date(reply.createdAt).toLocaleDateString()}
+        </div>
+        <div>${reply.content}</div>
+      </div>
+    `;
+  }).join("");
+
+  card.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+      <div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+          ${doubt.authorName}${roleTag} · ${new Date(doubt.createdAt).toLocaleDateString()}
+        </div>
+        <div style="font-size: 15px; font-weight: 500;">${doubt.question}</div>
+      </div>
+      ${isTeacherOrAuthor ? `
+        <button onclick="deleteDoubt('${doubt._id}')" style="
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #e53e3e;
+          font-size: 13px;
+          padding: 4px 8px;
+          border-radius: 6px;
+        ">✕ Delete</button>
+      ` : ""}
+    </div>
+
+    ${repliesHTML ? `<div style="margin-top: 8px;">${repliesHTML}</div>` : ""}
+
+    <div style="display: flex; gap: 8px; margin-top: 12px;">
+      <input
+        type="text"
+        id="reply-${doubt._id}"
+        placeholder="Write a reply..."
+        style="flex: 1; margin: 0; font-size: 13px; padding: 9px 14px;"
+        onkeydown="if(event.key==='Enter') postReply('${doubt._id}')"
+      >
+      <button onclick="postReply('${doubt._id}')" style="
+        padding: 9px 16px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+      ">Reply</button>
+    </div>
+  `;
+
+  list.appendChild(card);
+}
+
+async function postDoubt() {
+  const question = document.getElementById("doubtInput").value.trim();
+  if (!question) {
+    document.getElementById("doubtMessage").innerText = "Please write your doubt first";
+    return;
+  }
+  try {
+    const response = await fetch(API + "/doubt/course/" + courseId, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ question })
+    });
+    const data = await response.json();
+    if (response.ok) {
+      document.getElementById("doubtInput").value = "";
+      document.getElementById("doubtMessage").style.color = "#38a169";
+      document.getElementById("doubtMessage").innerText = "✅ Doubt posted!";
+      setTimeout(() => document.getElementById("doubtMessage").innerText = "", 2000);
+      loadDoubts();
+    } else {
+      document.getElementById("doubtMessage").style.color = "#e53e3e";
+      document.getElementById("doubtMessage").innerText = "❌ " + data.message;
+    }
+  } catch (error) {
+    console.log("Error posting doubt", error);
+  }
+}
+
+async function postReply(doubtId) {
+  const input = document.getElementById("reply-" + doubtId);
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    const response = await fetch(API + "/doubt/" + doubtId + "/reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ content })
+    });
+    if (response.ok) {
+      input.value = "";
+      loadDoubts();
+    }
+  } catch (error) {
+    console.log("Error posting reply", error);
+  }
+}
+
+async function deleteDoubt(doubtId) {
+  if (!confirm("Delete this doubt?")) return;
+  try {
+    const response = await fetch(API + "/doubt/" + doubtId, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (response.ok) loadDoubts();
+  } catch (error) {
+    console.log("Error deleting doubt", error);
+  }
+}
+
+// ================= BACK =================
 function goBack() {
   window.location.href = "dashboard.html";
 }
 
-
-// INITIAL LOAD
+// ================= INITIAL LOAD =================
 loadCourse();
 loadLectures();
 loadQuizzes();
-
+loadDoubts();
 </script>
 
 </body>
