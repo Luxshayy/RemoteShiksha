@@ -3,6 +3,7 @@
 <head>
   <title>Course</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
@@ -25,16 +26,67 @@
       </span>
     </div>
 
+    <!-- ✅ VIDEO + CHAT SIDE BY SIDE -->
     <div id="livePlayer" style="display:none;">
-      <iframe
-        id="liveIframe"
-        width="100%"
-        height="400"
-        src=""
-        frameborder="0"
-        allowfullscreen
-        style="border-radius: 8px;"
-      ></iframe>
+      <div style="display: flex; gap: 16px; align-items: flex-start;">
+
+        <!-- YouTube Embed -->
+        <div style="flex: 2; min-width: 0;">
+          <iframe
+            id="liveIframe"
+            width="100%"
+            height="400"
+            src=""
+            frameborder="0"
+            allowfullscreen
+            style="border-radius: 8px; display: block;"
+          ></iframe>
+        </div>
+
+        <!-- Live Chat -->
+        <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; height: 400px;">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">💬 Live Chat</div>
+
+          <div id="chatMessages" style="
+            flex: 1;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px 12px 0 0;
+            overflow-y: auto;
+            padding: 12px;
+            font-size: 13px;
+          "></div>
+
+          <div style="display: flex;">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Type a message..."
+              style="
+                flex: 1;
+                margin: 0;
+                border-radius: 0 0 0 12px;
+                border-top: none;
+                font-size: 13px;
+                padding: 10px 14px;
+              "
+              onkeydown="if(event.key==='Enter') sendChat()"
+            >
+            <button onclick="sendChat()" style="
+              padding: 10px 16px;
+              border: none;
+              border-radius: 0 0 12px 0;
+              background: linear-gradient(135deg, #6366f1, #8b5cf6);
+              color: white;
+              font-weight: 600;
+              font-size: 13px;
+              cursor: pointer;
+              white-space: nowrap;
+            ">Send</button>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <div id="noStreamMsg" style="display:none;">
@@ -151,7 +203,51 @@ const API = "/api";
 
 let currentEditId = null;
 
-// SHOW TEACHER PANELS
+// ================= SOCKET.IO LIVE CHAT =================
+const socket = io();
+socket.emit("join-lecture", courseId);
+
+socket.on("receive-message", ({ message, sender, role, time }) => {
+  const box = document.getElementById("chatMessages");
+  const isMe = sender === user.name;
+  const roleTag = role === "teacher" ? " 👨‍🏫" : "";
+
+  const div = document.createElement("div");
+  div.style.cssText = `margin-bottom: 8px; text-align: ${isMe ? "right" : "left"};`;
+  div.innerHTML = `
+    <div style="font-size: 11px; color: #888; margin-bottom: 2px;">
+      ${isMe ? "You" : sender}${roleTag} · ${new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+    </div>
+    <div style="
+      display: inline-block;
+      background: ${isMe ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "#f3f4f6"};
+      color: ${isMe ? "white" : "#333"};
+      padding: 7px 12px;
+      border-radius: ${isMe ? "14px 14px 4px 14px" : "14px 14px 14px 4px"};
+      font-size: 13px;
+      max-width: 85%;
+      word-break: break-word;
+    ">${message}</div>
+  `;
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+});
+
+function sendChat() {
+  const input = document.getElementById("chatInput");
+  const message = input.value.trim();
+  if (!message) return;
+  socket.emit("send-message", {
+    lectureId: courseId,
+    message,
+    sender: user.name,
+    role: user.role
+  });
+  input.value = "";
+}
+
+// ================= SHOW TEACHER PANELS =================
 if (user.role === "teacher") {
   document.getElementById("teacherPanel").style.display = "block";
   document.getElementById("quizTeacherPanel").style.display = "block";

@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -13,11 +15,39 @@ const resultRoutes = require("./routes/result");
 const adminRoutes = require("./routes/admin");
 
 const app = express();
+const server = http.createServer(app);
 
+// ================= SOCKET.IO SETUP =================
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
+
+io.on('connection', (socket) => {
+
+  // Student/Teacher joins a lecture room
+  socket.on('join-lecture', (lectureId) => {
+    socket.join(lectureId);
+  });
+
+  // Broadcast message to everyone in that lecture room
+  socket.on('send-message', ({ lectureId, message, sender, role }) => {
+    const msg = {
+      message,
+      sender,
+      role,
+      time: new Date().toISOString()
+    };
+    io.to(lectureId).emit('receive-message', msg);
+  });
+
+  socket.on('disconnect', () => {});
+});
+
+// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 
-// ================= ROOT ROUTE  =================
+// ================= ROOT ROUTE =================
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/frontend/home.html');
 });
@@ -66,6 +96,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
