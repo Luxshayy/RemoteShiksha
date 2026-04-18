@@ -597,3 +597,178 @@ textarea:focus {
     min-height: 44px;
   }
 }
+
+
+/* ========================= */
+/* RESPONSIVE — ALL PAGES    */
+/* ========================= */
+
+/* --- COURSE PAGE: video + chat stacks on mobile --- */
+#livePlayer > div {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* --- AI TEACHER BANNER on dashboard --- */
+.ai-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+
+  /* ---- COURSE PAGE ---- */
+
+  /* Video + chat: stack vertically */
+  #livePlayer > div {
+    flex-direction: column !important;
+  }
+
+  /* Chat box: full width, fixed height */
+  #livePlayer > div > div:last-child {
+    min-width: unset !important;
+    width: 100% !important;
+    height: 320px !important;
+  }
+
+  /* Live stream iframe: full height on mobile */
+  #liveIframe {
+    height: 220px !important;
+  }
+
+  /* Teacher live panel: full width */
+  #teacherLivePanel {
+    margin-top: 12px;
+  }
+
+  /* Doubt reply row: stack input + button */
+  #doubtList .card input[type="text"] {
+    border-radius: 10px !important;
+    border-top: 2px solid #e5e7eb !important;
+  }
+
+  #doubtList > div > div:last-child {
+    flex-direction: column !important;
+  }
+
+  #doubtList > div > div:last-child button {
+    border-radius: 10px !important;
+    width: 100% !important;
+  }
+
+  /* ---- DASHBOARD PAGE ---- */
+
+  /* AI Teacher banner: stack on mobile */
+  .card.form-card > div,
+  .ai-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .card.form-card .btn[onclick*="ai-teacher"] {
+    width: 100% !important;
+    margin-top: 10px;
+  }
+
+  /* ---- AI TEACHER PAGE ---- */
+
+  /* Chat window: shorter on mobile */
+  #chatWindow {
+    height: 360px !important;
+  }
+
+  /* Input + send button: stack cleanly */
+  #userInput {
+    border-radius: 0 0 0 12px !important;
+    font-size: 15px !important;
+    min-height: 52px !important;
+  }
+
+  /* ---- QUIZ PAGE ---- */
+
+  /* Timer: smaller on mobile */
+  #timerBox {
+    font-size: 16px !important;
+    padding: 8px 16px !important;
+  }
+
+  /* Options: larger tap targets */
+  .option {
+    padding: 16px !important;
+    font-size: 15px !important;
+    min-height: 56px !important;
+  }
+
+  /* ---- LECTURE PAGE ---- */
+
+  /* Attachment cards: stack view/delete buttons */
+  .card.form-card > div[style*="justify-content: space-between"] {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  /* Upload panel: full width */
+  #uploadPanel {
+    padding: 16px !important;
+  }
+
+  /* ---- GENERAL ---- */
+
+  /* Any flex row with a send button becomes stacked */
+  .dashboard h2 {
+    font-size: 20px !important;
+  }
+
+  /* Navbar button: smaller padding on mobile */
+  .navbar .btn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* Cards: tighter padding on mobile */
+  .card {
+    padding: 16px !important;
+  }
+
+  .course-card {
+    padding: 16px !important;
+  }
+
+  /* Section headings */
+  .section h3 {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Very small phones */
+
+  /* Live chat input row */
+  #chatInput {
+    font-size: 14px !important;
+  }
+
+  /* AI Teacher chat window */
+  #chatWindow {
+    height: 300px !important;
+  }
+
+  /* Hero title on index page */
+  .hero-title {
+    font-size: 28px !important;
+  }
+
+  /* Auth card: tighter */
+  .auth-card {
+    padding: 28px 20px !important;
+  }
+
+  /* Dashboard welcome */
+  #welcome {
+    font-size: 13px !important;
+  }
+}
