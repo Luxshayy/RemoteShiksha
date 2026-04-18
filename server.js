@@ -14,6 +14,7 @@ const quizRoutes = require('./routes/quiz');
 const resultRoutes = require("./routes/result");
 const adminRoutes = require("./routes/admin");
 const doubtRoutes = require("./routes/doubt");
+const aiRoutes = require("./routes/ai");
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ app.use('/api/quiz', quizRoutes);
 app.use("/api/result", resultRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/doubt", doubtRoutes);
+app.use("/api/ai", aiRoutes);
 
 // ================= PROTECTED TEST ROUTES =================
 app.get('/api/protected', authMiddleware, (req, res) => {

@@ -15,6 +15,17 @@
 
   <p id="welcome"></p>
 
+  <!-- ✅ AI TEACHER BANNER -->
+  <div class="card form-card" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+    <div>
+      <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">🤖 AI Teacher</div>
+      <div style="font-size: 13px; color: #888;">Stuck on something? Ask your AI teacher anytime, instantly.</div>
+    </div>
+    <button class="btn" onclick="window.location.href='ai-teacher.html'" style="width: auto; padding: 11px 20px; white-space: nowrap;">
+      Ask Now ✦
+    </button>
+  </div>
+
   <!-- STUDENT -->
   <div id="studentCourses" style="display:none;">
 
@@ -119,7 +130,6 @@ async function loadStudentCourses() {
     availableList.innerHTML = "";
 
     const myCourseIds = myData.courses.map(c => c._id);
-
     const unenrolled = allData.courses.filter(c => !myCourseIds.includes(c._id));
 
     if (unenrolled.length === 0) {
@@ -163,7 +173,6 @@ async function loadResults() {
     results.forEach(result => {
       const percentage = Math.round((result.score / result.total) * 100);
 
-      // Color based on score
       let color, label;
       if (percentage >= 80) {
         color = "#38a169"; label = "Excellent";
@@ -175,7 +184,6 @@ async function loadResults() {
 
       const card = document.createElement("div");
       card.className = "course-card";
-
       card.innerHTML = `
         <div class="course-title">${result.quiz ? result.quiz.title : "Quiz"}</div>
         <div class="course-meta" style="margin-bottom: 10px;">
@@ -187,7 +195,6 @@ async function loadResults() {
             <span>Score: <strong>${result.score}/${result.total}</strong></span>
             <span style="color: ${color}; font-weight: 600;">${percentage}%</span>
           </div>
-
           <div style="background: #e2e8f0; border-radius: 999px; height: 8px; overflow: hidden;">
             <div style="width: ${percentage}%; background: ${color}; height: 100%; border-radius: 999px; transition: width 0.5s ease;"></div>
           </div>
@@ -197,7 +204,6 @@ async function loadResults() {
           ${label}
         </span>
       `;
-
       resultList.appendChild(card);
     });
 

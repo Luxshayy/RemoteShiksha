@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Teacher</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="nav-title">🤖 AI Teacher</div>
+  <button class="btn" onclick="window.location.href='dashboard.html'">Back</button>
+</div>
+
+<div class="dashboard">
+
+  <div class="card form-card" style="margin-bottom: 16px;">
+    <p style="font-size: 14px; color: #555; margin: 0;">
+      👋 Hi <strong id="userName"></strong>! I'm your AI Teacher. Ask me anything — concepts, explanations, examples, or problems you're stuck on.
+    </p>
+  </div>
+
+  <!-- Chat Window -->
+  <div id="chatWindow" style="
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    height: 480px;
+    overflow-y: auto;
+    padding: 16px;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  "></div>
+
+  <!-- Input -->
+  <div style="display: flex; margin-top: 0;">
+    <textarea
+      id="userInput"
+      placeholder="Ask a question... e.g. 'Explain Newton's 3rd law with an example'"
+      style="
+        flex: 1;
+        margin: 0;
+        border-radius: 0 0 0 12px;
+        border-top: none;
+        font-size: 14px;
+        padding: 12px 16px;
+        min-height: 56px;
+        max-height: 120px;
+        resize: none;
+        line-height: 1.5;
+      "
+      onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"
+    ></textarea>
+    <button id="sendBtn" onclick="sendMessage()" style="
+      padding: 12px 22px;
+      border: none;
+      border-radius: 0 0 12px 0;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      align-self: stretch;
+    ">Send ✦</button>
+  </div>
+  <p style="font-size: 12px; color: #aaa; margin-top: 6px;">Press Enter to send · Shift+Enter for new line</p>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user) {
+  window.location.href = "index.html";
+}
+
+document.getElementById("userName").innerText = user.name;
+
+const API = "/api";
+
+// Stores the full conversation history sent to Claude
+let conversationHistory = [];
+
+// ================= RENDER A MESSAGE =================
+function renderMessage(role, text) {
+  const chatWindow = document.getElementById("chatWindow");
+  const isUser = role === "user";
+
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display: flex; justify-content: ${isUser ? "flex-end" : "flex-start"};`;
+
+  const bubble = document.createElement("div");
+  bubble.style.cssText = `
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: ${isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px"};
+    background: ${isUser ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "#f3f4f6"};
+    color: ${isUser ? "white" : "#333"};
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  `;
+
+  // Label above bubble
+  const label = document.createElement("div");
+  label.style.cssText = `font-size: 11px; color: #aaa; margin-bottom: 4px; text-align: ${isUser ? "right" : "left"};`;
+  label.innerText = isUser ? "You" : "🤖 AI Teacher";
+
+  bubble.innerText = text;
+
+  const container = document.createElement("div");
+  container.style.cssText = `width: 100%;`;
+  container.appendChild(label);
+
+  const row = document.createElement("div");
+  row.style.cssText = `display: flex; justify-content: ${isUser ? "flex-end" : "flex-start"};`;
+  row.appendChild(bubble);
+  container.appendChild(row);
+
+  chatWindow.appendChild(container);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+// ================= RENDER TYPING INDICATOR =================
+function showTyping() {
+  const chatWindow = document.getElementById("chatWindow");
+  const el = document.createElement("div");
+  el.id = "typingIndicator";
+
+  el.innerHTML = `
+    <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">🤖 AI Teacher</div>
+    <div style="
+      display: inline-block;
+      background: #f3f4f6;
+      padding: 10px 16px;
+      border-radius: 18px 18px 18px 4px;
+      font-size: 14px;
+      color: #888;
+    ">Thinking<span id="dots">.</span></div>
+  `;
+
+  chatWindow.appendChild(el);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  // Animate dots
+  let count = 1;
+  window._dotsInterval = setInterval(() => {
+    count = (count % 3) + 1;
+    const dots = document.getElementById("dots");
+    if (dots) dots.innerText = ".".repeat(count);
+  }, 400);
+}
+
+function hideTyping() {
+  clearInterval(window._dotsInterval);
+  const el = document.getElementById("typingIndicator");
+  if (el) el.remove();
+}
+
+// ================= SEND MESSAGE =================
+async function sendMessage() {
+  const input = document.getElementById("userInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Disable input while waiting
+  input.disabled = true;
+  document.getElementById("sendBtn").disabled = true;
+  document.getElementById("sendBtn").innerText = "...";
+
+  // Show user message
+  renderMessage("user", text);
+  input.value = "";
+
+  // Add to history
+  conversationHistory.push({ role: "user", content: text });
+
+  // Show typing
+  showTyping();
+
+  try {
+    const response = await fetch(API + "/ai/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ messages: conversationHistory })
+    });
+
+    hideTyping();
+    const data = await response.json();
+
+    if (response.ok) {
+      renderMessage("assistant", data.reply);
+      conversationHistory.push({ role: "assistant", content: data.reply });
+    } else {
+      renderMessage("assistant", "⚠️ Sorry, something went wrong. Please try again.");
+    }
+
+  } catch (error) {
+    hideTyping();
+    renderMessage("assistant", "⚠️ Could not reach the AI. Check your connection and try again.");
+    console.log("AI chat error:", error);
+  }
+
+  // Re-enable input
+  input.disabled = false;
+  document.getElementById("sendBtn").disabled = false;
+  document.getElementById("sendBtn").innerText = "Send ✦";
+  input.focus();
+}
+
+// ================= WELCOME MESSAGE =================
+window.onload = () => {
+  renderMessage("assistant", `Hi ${user.name}! 👋 I'm your AI Teacher on RemoteShiksha.\n\nYou can ask me anything — whether it's a concept you're struggling with, a topic you want explained differently, or a problem you want me to walk through step by step.\n\nWhat would you like to learn today?`);
+};
+</script>
+
+</body>
+</html>
